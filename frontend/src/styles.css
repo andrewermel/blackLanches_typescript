@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: Inter, system-ui, sans-serif;
+  margin: 0;
+  background: #f5f6fa;
+  color: #222;
+}
+.app-container {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 16px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+nav a {
+  margin-left: 8px;
+  color: #2563eb;
+  text-decoration: none;
+}
+.card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.08);
+}
+.card h2 {
+  margin-top: 0;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+input {
+  padding: 8px 10px;
+  border: 1px solid #e6e9ef;
+  border-radius: 6px;
+}
+button {
+  padding: 10px 12px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.message {
+  padding: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 6px;
+}

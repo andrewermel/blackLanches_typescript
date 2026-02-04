@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import IngredientPage from "./pages/IngredientPage.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 
@@ -18,9 +19,18 @@ export default function App() {
         <nav>
           <a href="#/login">Login</a>
           <a href="#/register">Cadastro</a>
+          <a href="#/ingredients">Ingredientes</a>
         </nav>
       </header>
-      <main>{route === "#/register" ? <Register /> : <Login />}</main>
+      <main>
+        {route === "#/register" ? (
+          <Register />
+        ) : route === "#/ingredients" ? (
+          <IngredientPage />
+        ) : (
+          <Login />
+        )}
+      </main>
     </div>
   );
 }

@@ -68,7 +68,7 @@ export class PortionService {
     // 3) Se o peso mudou, recalcula o custo
     if (data.weightG !== undefined) {
       const newCost = calculatePortionCost(
-        existing.ingredient.cost as Prisma.Decimal,
+        existing.ingredient.cost as Decimal,
         existing.ingredient.weightG,
         data.weightG,
       );

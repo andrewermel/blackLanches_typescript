@@ -199,8 +199,8 @@ export default function SnackPage() {
                     <div>
                       <strong>{snack.name}</strong>
                       <div style={{ fontSize: 12, color: "#666" }}>
-                        Custo: R$ {formatCurrency(snack.totalCost)} | Preço sugerido: R${" "}
-                        {formatCurrency(snack.suggestedPrice)}
+                        Custo: R$ {formatCurrency(snack.totalCost)} | Preço
+                        sugerido: R$ {formatCurrency(snack.suggestedPrice)}
                       </div>
                       <div style={{ fontSize: 12, color: "#666" }}>
                         {snack.portions?.length || 0} porções (
@@ -246,10 +246,12 @@ export default function SnackPage() {
               }}
             >
               <div>
-                <strong>Custo Total:</strong> R$ {formatCurrency(selectedSnack.totalCost)}
+                <strong>Custo Total:</strong> R${" "}
+                {formatCurrency(selectedSnack.totalCost)}
               </div>
               <div>
-                <strong>Peso Total:</strong> {formatWeight(selectedSnack.totalWeightG)}
+                <strong>Peso Total:</strong>{" "}
+                {formatWeight(selectedSnack.totalWeightG)}
               </div>
               <div style={{ fontSize: 18, color: "green", marginTop: 5 }}>
                 <strong>Preço Sugerido:</strong> R${" "}

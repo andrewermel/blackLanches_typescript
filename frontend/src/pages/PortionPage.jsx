@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
-import { formatCurrency, formatWeight, formatCostPerGram } from "../utils/formatters";
+import {
+    formatCurrency,
+    formatWeight
+} from "../utils/formatters";
 
 const API_URL = API_ENDPOINTS.PORTIONS;
 const INGREDIENTS_URL = API_ENDPOINTS.INGREDIENTS;
@@ -129,7 +132,8 @@ export default function PortionPage() {
           <option value="">Selecione o ingrediente</option>
           {ingredients.map((ing) => (
             <option key={ing.id} value={ing.id}>
-              {ing.name} ({formatWeight(ing.weightG)} - R$ {formatCurrency(ing.cost)})
+              {ing.name} ({formatWeight(ing.weightG)} - R${" "}
+              {formatCurrency(ing.cost)})
             </option>
           ))}
         </select>

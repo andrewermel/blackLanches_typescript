@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
-import { formatCurrency, formatWeight, formatCostPerGram } from "../utils/formatters";
+import {
+    formatCostPerGram,
+    formatCurrency,
+    formatWeight,
+} from "../utils/formatters";
 
 const API_URL = API_ENDPOINTS.INGREDIENTS;
 

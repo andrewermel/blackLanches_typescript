@@ -7,7 +7,7 @@
 export const formatCurrency = (value, decimals = 2) => {
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "0,00";
-  
+
   return num.toLocaleString("pt-BR", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,

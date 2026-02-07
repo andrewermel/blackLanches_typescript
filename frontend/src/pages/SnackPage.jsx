@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { API_ENDPOINTS, getSnackPortionUrl } from "../config/api";
+import { formatCurrency, formatWeight } from "../utils/formatters";
 
-const API_URL = "http://localhost:3000/api/v1/snacks";
-const PORTIONS_URL = "http://localhost:3000/api/v1/portions";
+const API_URL = API_ENDPOINTS.SNACKS;
+const PORTIONS_URL = API_ENDPOINTS.PORTIONS;
 
 export default function SnackPage() {
   const [snacks, setSnacks] = useState([]);
@@ -41,7 +43,7 @@ export default function SnackPage() {
       const data = await res.json();
       setPortions(data);
     } catch (err) {
-      console.error("Erro ao buscar porções:", err);
+      setError("Erro ao buscar porções");
     }
   }
 
@@ -101,7 +103,7 @@ export default function SnackPage() {
 
     try {
       const res = await fetch(
-        `${API_URL}/${selectedSnack.id}/portions/${selectedPortionId}`,
+        getSnackPortionUrl(selectedSnack.id, selectedPortionId),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -127,10 +129,9 @@ export default function SnackPage() {
     if (!confirm("Remover esta porção do lanche?")) return;
 
     try {
-      const res = await fetch(
-        `${API_URL}/${selectedSnack.id}/portions/${portionId}`,
-        { method: "DELETE" },
-      );
+      const res = await fetch(getSnackPortionUrl(selectedSnack.id, portionId), {
+        method: "DELETE",
+      });
 
       if (!res.ok) {
         const data = await res.json();
@@ -198,12 +199,12 @@ export default function SnackPage() {
                     <div>
                       <strong>{snack.name}</strong>
                       <div style={{ fontSize: 12, color: "#666" }}>
-                        Custo: R$ {snack.totalCost} | Preço sugerido: R${" "}
-                        {snack.suggestedPrice}
+                        Custo: R$ {formatCurrency(snack.totalCost)} | Preço sugerido: R${" "}
+                        {formatCurrency(snack.suggestedPrice)}
                       </div>
                       <div style={{ fontSize: 12, color: "#666" }}>
                         {snack.portions?.length || 0} porções (
-                        {snack.totalWeightG || 0}g)
+                        {formatWeight(snack.totalWeightG || 0)})
                       </div>
                     </div>
                     <div>
@@ -245,14 +246,14 @@ export default function SnackPage() {
               }}
             >
               <div>
-                <strong>Custo Total:</strong> R$ {selectedSnack.totalCost}
+                <strong>Custo Total:</strong> R$ {formatCurrency(selectedSnack.totalCost)}
               </div>
               <div>
-                <strong>Peso Total:</strong> {selectedSnack.totalWeightG}g
+                <strong>Peso Total:</strong> {formatWeight(selectedSnack.totalWeightG)}
               </div>
               <div style={{ fontSize: 18, color: "green", marginTop: 5 }}>
                 <strong>Preço Sugerido:</strong> R${" "}
-                {selectedSnack.suggestedPrice}
+                {formatCurrency(selectedSnack.suggestedPrice)}
               </div>
             </div>
 
@@ -270,8 +271,8 @@ export default function SnackPage() {
                     }}
                   >
                     <span>
-                      {portion.name} ({portion.weightG}g - R${" "}
-                      {Number(portion.cost).toFixed(4)})
+                      {portion.name} ({formatWeight(portion.weightG)} - R${" "}
+                      {formatCurrency(portion.cost, 4)})
                     </span>
                     <button onClick={() => handleRemovePortion(portion.id)}>
                       ❌
@@ -293,8 +294,8 @@ export default function SnackPage() {
                 <option value="">Selecione uma porção</option>
                 {portions.map((portion) => (
                   <option key={portion.id} value={portion.id}>
-                    {portion.name} ({portion.weightG}g - R${" "}
-                    {Number(portion.cost).toFixed(4)})
+                    {portion.name} ({formatWeight(portion.weightG)} - R${" "}
+                    {formatCurrency(portion.cost, 4)})
                   </option>
                 ))}
               </select>

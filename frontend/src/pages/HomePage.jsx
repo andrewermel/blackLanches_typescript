@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
@@ -12,7 +13,7 @@ export default function HomePage() {
     }
 
     // Opcional: validar token com endpoint protegido
-    fetch("http://localhost:3000/protected", {
+    fetch(API_ENDPOINTS.AUTH.PROTECTED, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
+import { formatCurrency, formatWeight, formatCostPerGram } from "../utils/formatters";
 
-const API_URL = "http://localhost:3000/api/v1/ingredients";
+const API_URL = API_ENDPOINTS.INGREDIENTS;
 
 export default function IngredientPage() {
   const [ingredients, setIngredients] = useState([]);
@@ -169,13 +171,13 @@ export default function IngredientPage() {
               >
                 <td style={{ padding: 8 }}>{ing.name}</td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  {ing.weightG}
+                  {formatWeight(ing.weightG)}
                 </td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  {Number(ing.cost).toFixed(2)}
+                  R$ {formatCurrency(ing.cost)}
                 </td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  {(Number(ing.cost) / ing.weightG).toFixed(4)}
+                  R$ {formatCostPerGram(Number(ing.cost), ing.weightG)}
                 </td>
                 <td style={{ textAlign: "center", padding: 8 }}>
                   <button

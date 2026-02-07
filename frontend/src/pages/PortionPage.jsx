@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
+import { formatCurrency, formatWeight, formatCostPerGram } from "../utils/formatters";
 
-const API_URL = "http://localhost:3000/api/v1/portions";
-const INGREDIENTS_URL = "http://localhost:3000/api/v1/ingredients";
+const API_URL = API_ENDPOINTS.PORTIONS;
+const INGREDIENTS_URL = API_ENDPOINTS.INGREDIENTS;
 
 export default function PortionPage() {
   const [portions, setPortions] = useState([]);
@@ -40,7 +42,7 @@ export default function PortionPage() {
       const data = await res.json();
       setIngredients(data);
     } catch (err) {
-      console.error("Erro ao buscar ingredientes:", err);
+      setError("Erro ao buscar ingredientes");
     }
   }
 
@@ -127,7 +129,7 @@ export default function PortionPage() {
           <option value="">Selecione o ingrediente</option>
           {ingredients.map((ing) => (
             <option key={ing.id} value={ing.id}>
-              {ing.name} ({ing.weightG}g - R$ {Number(ing.cost).toFixed(2)})
+              {ing.name} ({formatWeight(ing.weightG)} - R$ {formatCurrency(ing.cost)})
             </option>
           ))}
         </select>
@@ -186,10 +188,10 @@ export default function PortionPage() {
                   {portion.ingredient?.name || "N/A"}
                 </td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  {portion.weightG}g
+                  {formatWeight(portion.weightG)}
                 </td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  R$ {Number(portion.cost).toFixed(4)}
+                  R$ {formatCurrency(portion.cost, 4)}
                 </td>
                 <td style={{ textAlign: "center", padding: 8 }}>
                   <button

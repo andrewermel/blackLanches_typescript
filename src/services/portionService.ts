@@ -1,21 +1,22 @@
 import { Decimal } from "@prisma/client/runtime/library";
 import prisma from "../lib/prisma.js";
+import type { Portion, Ingredient } from "../types/entities.js";
 
 const calculatePortionCost = (
   ingredientCost: Decimal,
   ingredientWeightG: number,
   portionWeightG: number,
-) => {
+): Decimal => {
   return ingredientCost
     .div(new Decimal(ingredientWeightG))
     .mul(new Decimal(portionWeightG));
 };
 
 export class PortionService {
-  async create(ingredientId: number, name: string, weightG: number) {
+  async create(ingredientId: number, name: string, weightG: number): Promise<Portion> {
     const ingredient = await prisma.ingredient.findUniqueOrThrow({
       where: { id: ingredientId },
-    });
+    }) as any;
 
     const cost = calculatePortionCost(
       ingredient.cost as Decimal,
@@ -30,27 +31,27 @@ export class PortionService {
         weightG,
         cost,
       },
-    });
+    }) as any;
   }
 
-  async findAll() {
+  async findAll(): Promise<(Portion & { ingredient: Ingredient })[]> {
     return prisma.portion.findMany({
       include: { ingredient: true },
-    });
+    }) as any;
   }
 
   async findById(id: number) {
     return prisma.portion.findUnique({
       where: { id },
       include: { ingredient: true },
-    });
+    }) as Promise<(Portion & { ingredient: Ingredient }) | null>;
   }
 
-  async update(id: number, data: { name?: string; weightG?: number }) {
+  async update(id: number, data: { name?: string; weightG?: number }): Promise<Portion & { ingredient: Ingredient }> {
     const existing = await prisma.portion.findUniqueOrThrow({
       where: { id },
       include: { ingredient: true },
-    });
+    }) as any;
 
     const updateData: {
       name?: string;
@@ -74,7 +75,7 @@ export class PortionService {
       where: { id },
       data: updateData,
       include: { ingredient: true },
-    });
+    }) as any;
   }
 
   async delete(id: number): Promise<{ message: string }> {

@@ -1,8 +1,10 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
 export interface Ingredient {
   id: number;
   name: string;
   weightG: number;
-  cost: string; // mantemos string pois Prisma usa Decimal serializado
+  cost: Decimal | string; // Decimal do Prisma ou string quando serializado
   createdAt: Date;
   updatedAt: Date;
 }
@@ -11,7 +13,7 @@ export interface Portion {
   id: number;
   name: string;
   weightG: number;
-  cost: string;
+  cost: Decimal | string;
   ingredientId: number;
   ingredient?: Ingredient;
   createdAt: Date;

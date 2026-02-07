@@ -4,14 +4,22 @@ import prisma from "../lib/prisma.js";
 
 import { SnackWithTotals } from "../types/entities.js";
 
-const calculateTotals = (portions: any[]) => {
+import type { Portion } from "../types/entities.js";
+
+interface TotalsResult {
+  totalCost: string;
+  totalWeightG: number;
+  suggestedPrice: string;
+}
+
+const calculateTotals = (portions: Portion[]): TotalsResult => {
   const totalCostDecimal = portions.reduce(
-    (sum: Decimal, p: any) => sum.plus(new Decimal(String(p.cost))),
+    (sum: Decimal, p: Portion) => sum.plus(new Decimal(String(p.cost))),
     new Decimal(0),
   );
   return {
     totalCost: totalCostDecimal.toFixed(4),
-    totalWeightG: portions.reduce((s: number, p: any) => s + p.weightG, 0),
+    totalWeightG: portions.reduce((s: number, p: Portion) => s + p.weightG, 0),
     suggestedPrice: totalCostDecimal.mul(new Decimal(2)).toFixed(4),
   };
 };
@@ -21,7 +29,7 @@ export class SnackService {
     return prisma.snack.create({
       data: { name: name.trim() },
       include: { snackPortions: { include: { portion: true } } },
-    });
+    }) as any;
   }
 
   async getSnackWithTotals(snackId: number): Promise<SnackWithTotals | null> {
@@ -32,9 +40,9 @@ export class SnackService {
 
     if (!snack) return null;
 
-    const portions = snack.snackPortions.map((sp: any) => sp.portion);
+    const portions = snack.snackPortions.map((sp) => sp.portion);
     const { totalCost, totalWeightG, suggestedPrice } =
-      calculateTotals(portions);
+      calculateTotals(portions as Portion[]);
 
     return {
       id: snack.id,
@@ -53,8 +61,8 @@ export class SnackService {
       include: { snackPortions: { include: { portion: true } } },
     });
 
-    return snacks.map((snack: any) => {
-      const portions = snack.snackPortions.map((sp: any) => sp.portion);
+    return snacks.map((snack) => {
+      const portions = snack.snackPortions.map((sp) => sp.portion) as Portion[];
       const { totalCost, totalWeightG, suggestedPrice } =
         calculateTotals(portions);
 
@@ -78,7 +86,7 @@ export class SnackService {
 
       return tx.snackPortion.create({
         data: { snackId, portionId },
-      });
+      }) as any;
     });
   }
 
@@ -102,6 +110,6 @@ export class SnackService {
   }
 
   async deleteSnack(snackId: number) {
-    return prisma.snack.delete({ where: { id: snackId } });
+    return prisma.snack.delete({ where: { id: snackId } }) as any;
   }
 }

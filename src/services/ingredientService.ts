@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
-
-const prisma = new PrismaClient();
+import prisma from "../lib/prisma.js";
 
 export class IngredientService {
   async create(name: string, weightG: number, cost: number) {
@@ -22,12 +20,21 @@ export class IngredientService {
     return prisma.ingredient.findUnique({ where: { id } });
   }
 
-  async update(id: number, name?: string, weightG?: number, cost?: number) {
-    const data: any = {};
-    if (name) data.name = name.trim();
-    if (weightG !== undefined) data.weightG = weightG;
-    if (cost !== undefined) data.cost = new Decimal(cost);
-    return prisma.ingredient.update({ where: { id }, data });
+  async update(
+    id: number,
+    data: { name?: string; weightG?: number; cost?: number },
+  ) {
+    const updateData: {
+      name?: string;
+      weightG?: number;
+      cost?: Decimal;
+    } = {};
+
+    if (data.name) updateData.name = data.name.trim();
+    if (data.weightG !== undefined) updateData.weightG = data.weightG;
+    if (data.cost !== undefined) updateData.cost = new Decimal(data.cost);
+
+    return prisma.ingredient.update({ where: { id }, data: updateData });
   }
 
   async delete(id: number) {

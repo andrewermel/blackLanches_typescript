@@ -1,92 +1,104 @@
 import { Request, Response } from "express";
+import { handleError } from "../helpers/errorHandler.js";
+import {
+    sendValidationError,
+    validatePositive,
+    validateRequired,
+} from "../helpers/validators.js";
 import { PortionService } from "../services/portionService.js";
 
 const portionService = new PortionService();
 
-export const createPortion = async (req: Request, res: Response) => {
-  // 1) Validação básica
+export const createPortion = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
   const { ingredientId, name, weightG } = req.body;
-  if (!ingredientId || !name || weightG === undefined) {
-    return res.status(400).json({
-      error: "ingredientId, name, and weightG are required.",
-    });
-  }
-  if (weightG <= 0) {
-    return res.status(400).json({ error: "Weight must be positive." });
-  }
+
+  const ingredientError = validateRequired(ingredientId, "IngredientId");
+  if (ingredientError) return sendValidationError(ingredientError, res);
+
+  const nameError = validateRequired(name, "Name");
+  if (nameError) return sendValidationError(nameError, res);
+
+  const weightError = validatePositive(weightG, "Weight");
+  if (weightError) return sendValidationError(weightError, res);
 
   try {
-    // 2) Delegamos ao service (calcula custo automaticamente)
-    const portion = await portionService.create(
-      ingredientId as number,
-      name as string,
-      weightG as number,
-    );
+    const portion = await portionService.create(ingredientId, name, weightG);
     return res.status(201).json(portion);
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      return res.status(400).json({ error: "Ingredient not found." });
-    }
-    return res.status(500).json({ error: "Error creating portion." });
+  } catch (error) {
+    return handleError(error, "Error creating portion.", res);
   }
 };
 
-export const listPortions = async (_req: Request, res: Response) => {
+export const listPortions = async (
+  _req: Request,
+  res: Response,
+): Promise<Response> => {
   try {
     const portions = await portionService.findAll();
     return res.json(portions);
   } catch (error) {
-    return res.status(500).json({ error: "Error fetching portions." });
+    return handleError(error, "Error fetching portions.", res);
   }
 };
 
-export const getPortion = async (req: Request, res: Response) => {
+export const getPortion = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const id = req.params.id as string;
+
+  if (!id) return res.status(400).json({ error: "Invalid ID." });
+
   try {
-    const id = req.params.id as string;
-    const portion = await portionService.findById(parseInt(id, 10));
-    if (!portion) return res.status(404).json({ error: "Portion not found." });
+    const portion = await portionService.findById(parseInt(id));
+    if (!portion) return res.status(404).json({ error: "Not found." });
     return res.json(portion);
   } catch (error) {
-    return res.status(500).json({ error: "Error fetching portion." });
+    return handleError(error, "Error fetching portion.", res);
   }
 };
 
-export const updatePortion = async (req: Request, res: Response) => {
+export const updatePortion = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const id = req.params.id as string;
+
+  if (!id) return res.status(400).json({ error: "Invalid ID." });
+
+  const { name, weightG } = req.body;
+
+  if (weightG !== undefined) {
+    const weightError = validatePositive(weightG, "Weight");
+    if (weightError) return sendValidationError(weightError, res);
+  }
+
   try {
-    const id = req.params.id as string;
-    const { name, weightG } = req.body;
-
-    if (weightG !== undefined && weightG <= 0) {
-      return res.status(400).json({ error: "Weight must be positive." });
-    }
-
-    // Monta objeto de atualização apenas com campos definidos
-    const updateData: Partial<{ name: string; weightG: number }> = {};
-    if (name !== undefined) updateData.name = name as string;
-    if (weightG !== undefined) updateData.weightG = weightG as number;
-
-    const portion = await portionService.update(parseInt(id, 10), updateData);
+    const portion = await portionService.update(parseInt(id), {
+      name,
+      weightG,
+    });
     return res.json(portion);
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      return res.status(404).json({ error: "Portion not found." });
-    }
-    return res.status(500).json({ error: "Error updating portion." });
+  } catch (error) {
+    return handleError(error, "Error updating portion.", res);
   }
 };
 
-export const deletePortion = async (req: Request, res: Response) => {
+export const deletePortion = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const id = req.params.id as string;
+
+  if (!id) return res.status(400).json({ error: "Invalid ID." });
+
   try {
-    const id = req.params.id as string;
-    const result = await portionService.delete(parseInt(id, 10));
+    const result = await portionService.delete(parseInt(id));
     return res.json(result);
-  } catch (error: any) {
-    if (error.message.includes("in use")) {
-      return res.status(409).json({ error: error.message });
-    }
-    if (error.code === "P2025") {
-      return res.status(404).json({ error: "Portion not found." });
-    }
-    return res.status(500).json({ error: "Error deleting portion." });
+  } catch (error) {
+    return handleError(error, "Error deleting portion.", res);
   }
 };

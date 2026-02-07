@@ -1,15 +1,11 @@
-// Adiciona tipagem para req.user
-declare module "express-serve-static-core" {
-  interface Request {
-    user?: any;
-  }
-}
-
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import type { JwtPayload } from "../types/jwt.js";
 
-function verifyToken(token: string, secret: string): any {
-  return jwt.verify(token, secret);
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: JwtPayload;
+  }
 }
 
 export function authenticateJWT(
@@ -24,28 +20,23 @@ export function authenticateJWT(
     return;
   }
 
-  // Validar schema Bearer
   if (!authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({
-        error:
-          "Invalid authorization header format. Expected 'Bearer <token>'.",
-      });
+    res.status(401).json({
+      error: "Invalid authorization header format. Expected 'Bearer <token>'.",
+    });
     return;
   }
 
   const secret = process.env.JWT_SECRET;
-
   if (!secret) {
     res.status(500).json({ error: "JWT secret not configured." });
     return;
   }
 
-  const token = authHeader.substring(7); // Remove "Bearer " prefix
+  const token = authHeader.substring(7);
 
   try {
-    const decoded = verifyToken(token, secret);
+    const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
     next();
   } catch (err) {

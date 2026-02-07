@@ -18,9 +18,9 @@ jest.mock("../services/ingredientService.js", () => {
 
 import { IngredientService } from "../services/ingredientService.js";
 import {
-    createIngredient,
-    getIngredient,
-    listIngredients,
+  createIngredient,
+  getIngredient,
+  listIngredients,
 } from "./ingredientController.js";
 
 const mockIngredientService =
@@ -41,8 +41,8 @@ describe("ingredientController", () => {
     res = { status, json } as unknown as Response;
   });
 
-  it("createIngredient returns 400 when missing fields", async () => {
-    req.body = { name: "X" };
+  it("createIngredient returns 400 when weight is zero", async () => {
+    req.body = { name: "X", weightG: 0, cost: 50 };
     await createIngredient(req as Request, res as Response);
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe("ingredientController", () => {
     await getIngredient(req as Request, res as Response);
 
     expect(status).toHaveBeenCalledWith(404);
-    expect(json).toHaveBeenCalledWith({ error: "Ingredient not found." });
+    expect(json).toHaveBeenCalledWith({ error: "Not found." });
   });
 
   it("listIngredients returns array", async () => {

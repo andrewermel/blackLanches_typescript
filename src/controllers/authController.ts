@@ -1,65 +1,59 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { handleError } from "../helpers/errorHandler.js";
+import {
+    sendValidationError,
+    validateRequired,
+} from "../helpers/validators.js";
+import prisma from "../lib/prisma.js";
+import type { JwtPayload } from "../types/index.js";
 
-const prisma = new PrismaClient();
+const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
-function verifyPassword(
-  token: string,
-  secret: string,
-): jwt.JwtPayload | string {
-  return jwt.verify(token, secret);
-}
-
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
 
-  // Validação simples
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
-  }
+  const emailError = validateRequired(email, "Email");
+  if (emailError) return sendValidationError(emailError, res);
 
-  // Normalizar email
+  const passwordError = validateRequired(password, "Password");
+  if (passwordError) return sendValidationError(passwordError, res);
+
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Validação de email
-  const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
   if (!emailRegex.test(normalizedEmail)) {
     return res.status(400).json({ error: "Invalid email format." });
   }
 
   try {
-    // 1. Find user by email
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
 
-    // 2. Check if user exists
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    // 3. Compare password with bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid password." });
     }
 
-    // 4. Generate JWT with better typing
-    const secret = process.env.JWT_SECRET as string;
+    const secret = process.env.JWT_SECRET;
     if (!secret) {
       return res.status(500).json({ error: "JWT secret not configured." });
     }
 
-    const token = jwt.sign({ userId: user.id, email: user.email }, secret, {
-      expiresIn: "1h",
-    });
+    const jwtPayload: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+    };
 
-    // 5. Return token
+    const token = jwt.sign(jwtPayload, secret, { expiresIn: "1h" });
+
     return res.json({ token });
   } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: "Login error." });
+    return handleError(error, "Login error.", res);
   }
 };

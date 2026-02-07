@@ -1,99 +1,120 @@
 import { Request, Response } from "express";
+import { handleError } from "../helpers/errorHandler.js";
+import {
+    sendValidationError,
+    validateRequired,
+} from "../helpers/validators.js";
 import { SnackService } from "../services/snackService.js";
 
 const snackService = new SnackService();
 
-export const createSnack = async (req: Request, res: Response) => {
+export const createSnack = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
   const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: "Snack name is required." });
-  }
+
+  const nameError = validateRequired(name, "Name");
+  if (nameError) return sendValidationError(nameError, res);
 
   try {
     const snack = await snackService.createSnack(name);
     return res.status(201).json(snack);
-  } catch (error: any) {
-    if (error.code === "P2002") {
-      return res.status(409).json({ error: "Snack name already exists." });
-    }
-    return res.status(500).json({ error: "Error creating snack." });
+  } catch (error) {
+    return handleError(error, "Error creating snack.", res);
   }
 };
 
-export const listSnacks = async (_req: Request, res: Response) => {
+export const listSnacks = async (
+  _req: Request,
+  res: Response,
+): Promise<Response> => {
   try {
     const snacks = await snackService.getAllSnacks();
     return res.json(snacks);
   } catch (error) {
-    return res.status(500).json({ error: "Error fetching snacks." });
+    return handleError(error, "Error fetching snacks.", res);
   }
 };
 
-export const getSnack = async (req: Request, res: Response) => {
+export const getSnack = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const id = req.params.id as string;
+
+  if (!id) return res.status(400).json({ error: "Invalid ID." });
+
   try {
-    const id = req.params.id as string;
-    const snack = await snackService.getSnackWithTotals(parseInt(id, 10));
-    if (!snack) return res.status(404).json({ error: "Snack not found." });
+    const snack = await snackService.getSnackWithTotals(parseInt(id));
+    if (!snack) return res.status(404).json({ error: "Not found." });
     return res.json(snack);
   } catch (error) {
-    return res.status(500).json({ error: "Error fetching snack." });
+    return handleError(error, "Error fetching snack.", res);
   }
 };
 
-export const addPortion = async (req: Request, res: Response) => {
+export const addPortion = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const snackId = req.params.snackId as string;
+  const portionId = req.params.portionId as string;
+
+  if (!snackId || !portionId) {
+    return res.status(400).json({ error: "Invalid ID." });
+  }
+
+  const { portionId: bodyPortionId } = req.body;
+
+  const portionError = validateRequired(bodyPortionId, "PortionId");
+  if (portionError) return sendValidationError(portionError, res);
+
   try {
-    const snackId = req.params.snackId as string;
-    const { portionId } = req.body;
-
-    if (!portionId) {
-      return res.status(400).json({ error: "portionId is required." });
-    }
-
     const snackPortion = await snackService.addPortion(
-      parseInt(snackId, 10),
-      portionId as number,
+      parseInt(snackId),
+      bodyPortionId,
     );
     return res.status(201).json(snackPortion);
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      return res.status(400).json({ error: "Snack or portion not found." });
-    }
-    if (error.code === "P2002") {
-      return res
-        .status(409)
-        .json({ error: "Portion already added to this snack." });
-    }
-    return res.status(500).json({ error: "Error adding portion to snack." });
+  } catch (error) {
+    return handleError(error, "Error adding portion.", res);
   }
 };
 
-export const removePortion = async (req: Request, res: Response) => {
-  try {
-    const snackId = req.params.snackId as string;
-    const portionId = req.params.portionId as string;
+export const removePortion = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const snackId = req.params.snackId as string;
+  const portionId = req.params.portionId as string;
 
+  if (!snackId || !portionId) {
+    return res.status(400).json({ error: "Invalid ID." });
+  }
+
+  try {
     const result = await snackService.removePortion(
-      parseInt(snackId, 10),
-      parseInt(portionId, 10),
+      parseInt(snackId),
+      parseInt(portionId),
     );
     return res.json(result);
-  } catch (error: any) {
-    if (error.message.includes("not found")) {
-      return res.status(404).json({ error: error.message });
-    }
-    return res.status(500).json({ error: "Error removing portion." });
+  } catch (error) {
+    return handleError(error, "Error removing portion.", res);
   }
 };
 
-export const deleteSnack = async (req: Request, res: Response) => {
+export const deleteSnack = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const id = req.params.id as string;
+
+  if (!id) return res.status(400).json({ error: "Invalid ID." });
+
   try {
-    const id = req.params.id as string;
-    await snackService.deleteSnack(parseInt(id, 10));
-    return res.json({ message: "Snack deleted." });
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      return res.status(404).json({ error: "Snack not found." });
-    }
-    return res.status(500).json({ error: "Error deleting snack." });
+    await snackService.deleteSnack(parseInt(id));
+    return res.json({ message: "Deleted." });
+  } catch (error) {
+    return handleError(error, "Error deleting snack.", res);
   }
 };

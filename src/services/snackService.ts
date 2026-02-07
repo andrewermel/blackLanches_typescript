@@ -1,7 +1,29 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
+import prisma from "../lib/prisma.js";
 
-const prisma = new PrismaClient();
+interface SnackWithTotals {
+  id: number;
+  name: string;
+  portions: any[];
+  totalCost: string;
+  totalWeightG: number;
+  suggestedPrice: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const calculateTotals = (portions: any[]) => {
+  const totalCostDecimal = portions.reduce(
+    (sum: Decimal, p: any) => sum.plus(new Decimal(String(p.cost))),
+    new Decimal(0),
+  );
+  return {
+    totalCost: totalCostDecimal.toFixed(4),
+    totalWeightG: portions.reduce((s: number, p: any) => s + p.weightG, 0),
+    suggestedPrice: totalCostDecimal.mul(new Decimal(2)).toFixed(4),
+  };
+};
 
 export class SnackService {
   async createSnack(name: string) {
@@ -11,7 +33,7 @@ export class SnackService {
     });
   }
 
-  async getSnackWithTotals(snackId: number) {
+  async getSnackWithTotals(snackId: number): Promise<SnackWithTotals | null> {
     const snack = await prisma.snack.findUnique({
       where: { id: snackId },
       include: { snackPortions: { include: { portion: true } } },
@@ -19,25 +41,9 @@ export class SnackService {
 
     if (!snack) return null;
 
-    // Extrai as porções
-    const portions = snack.snackPortions.map(
-      (sp: (typeof snack.snackPortions)[0]) => sp.portion,
-    );
-
-    // Calcula totais
-    const totalCostDecimal = portions.reduce(
-      (sum: Decimal, p: (typeof portions)[0]) =>
-        sum.plus(new Decimal(String(p.cost))),
-      new Decimal(0),
-    );
-    const totalCost = totalCostDecimal.toFixed(4);
-    const totalWeightG = portions.reduce(
-      (s: number, p: (typeof portions)[0]) => s + p.weightG,
-      0,
-    );
-
-    // Preço sugerido = 2x o custo total
-    const suggestedPrice = totalCostDecimal.mul(new Decimal(2)).toFixed(4);
+    const portions = snack.snackPortions.map((sp: any) => sp.portion);
+    const { totalCost, totalWeightG, suggestedPrice } =
+      calculateTotals(portions);
 
     return {
       id: snack.id,
@@ -51,28 +57,15 @@ export class SnackService {
     };
   }
 
-  async getAllSnacks() {
+  async getAllSnacks(): Promise<SnackWithTotals[]> {
     const snacks = await prisma.snack.findMany({
       include: { snackPortions: { include: { portion: true } } },
     });
 
-    return snacks.map((snack: (typeof snacks)[0]) => {
-      const portions = snack.snackPortions.map(
-        (sp: (typeof snack.snackPortions)[0]) => sp.portion,
-      );
-
-      const totalCostDecimal = portions.reduce(
-        (sum: Decimal, p: (typeof portions)[0]) =>
-          sum.plus(new Decimal(String(p.cost))),
-        new Decimal(0),
-      );
-      const totalCost = totalCostDecimal.toFixed(4);
-      const totalWeightG = portions.reduce(
-        (s: number, p: (typeof portions)[0]) => s + p.weightG,
-        0,
-      );
-
-      const suggestedPrice = totalCostDecimal.mul(new Decimal(2)).toFixed(4);
+    return snacks.map((snack: any) => {
+      const portions = snack.snackPortions.map((sp: any) => sp.portion);
+      const { totalCost, totalWeightG, suggestedPrice } =
+        calculateTotals(portions);
 
       return {
         id: snack.id,
@@ -89,20 +82,19 @@ export class SnackService {
 
   async addPortion(snackId: number, portionId: number) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Valida que snack e porção existem
       await tx.snack.findUniqueOrThrow({ where: { id: snackId } });
       await tx.portion.findUniqueOrThrow({ where: { id: portionId } });
 
-      // Cria a associação
-      const snackPortion = await tx.snackPortion.create({
+      return tx.snackPortion.create({
         data: { snackId, portionId },
       });
-
-      return snackPortion;
     });
   }
 
-  async removePortion(snackId: number, portionId: number) {
+  async removePortion(
+    snackId: number,
+    portionId: number,
+  ): Promise<{ message: string }> {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const snackPortion = await tx.snackPortion.findFirst({
         where: { snackId, portionId },
@@ -114,12 +106,11 @@ export class SnackService {
 
       await tx.snackPortion.delete({ where: { id: snackPortion.id } });
 
-      return { message: "Portion removed from snack." };
+      return { message: "Portion removed." };
     });
   }
 
   async deleteSnack(snackId: number) {
-    // Deletar um snack cascata deleta suas SnackPortion
     return prisma.snack.delete({ where: { id: snackId } });
   }
 }

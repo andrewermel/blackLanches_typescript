@@ -40,7 +40,7 @@ describe("authController - login", () => {
 
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({
-      error: "Email and password are required.",
+      error: "Email is required.",
     });
   });
 
@@ -51,7 +51,7 @@ describe("authController - login", () => {
 
     expect(mockStatus).toHaveBeenCalledWith(400);
     expect(mockJson).toHaveBeenCalledWith({
-      error: "Email and password are required.",
+      error: "Password is required.",
     });
   });
 

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:3000/api/v1/ingredients";
+const API_URL = "http://localhost:3000/api/v1/portions";
+const INGREDIENTS_URL = "http://localhost:3000/api/v1/ingredients";
 
-export default function IngredientPage() {
+export default function PortionPage() {
+  const [portions, setPortions] = useState([]);
   const [ingredients, setIngredients] = useState([]);
-  const [form, setForm] = useState({ name: "", weightG: "", cost: "" });
-  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({ ingredientId: "", name: "", weightG: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -15,19 +17,30 @@ export default function IngredientPage() {
       window.location.hash = "#/login";
       return;
     }
+    fetchPortions();
     fetchIngredients();
   }, []);
 
-  async function fetchIngredients() {
+  async function fetchPortions() {
     setLoading(true);
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
-      setIngredients(data);
+      setPortions(data);
     } catch (err) {
-      setError("Erro ao buscar ingredientes");
+      setError("Erro ao buscar porções");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchIngredients() {
+    try {
+      const res = await fetch(INGREDIENTS_URL);
+      const data = await res.json();
+      setIngredients(data);
+    } catch (err) {
+      console.error("Erro ao buscar ingredientes:", err);
     }
   }
 
@@ -35,37 +48,35 @@ export default function IngredientPage() {
     e.preventDefault();
     setError("");
 
-    const payload = {
-      name: form.name,
-      weightG: Number(form.weightG),
-      cost: Number(form.cost),
-    };
+    const url = editingId ? `${API_URL}/${editingId}` : API_URL;
+    const method = editingId ? "PUT" : "POST";
 
     try {
-      const url = editingId ? `${API_URL}/${editingId}` : API_URL;
-      const method = editingId ? "PUT" : "POST";
-
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ingredientId: Number(form.ingredientId),
+          name: form.name,
+          weightG: Number(form.weightG),
+        }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Erro ao salvar ingrediente");
+        throw new Error(data.error || "Erro ao salvar porção");
       }
 
-      setForm({ name: "", weightG: "", cost: "" });
+      setForm({ ingredientId: "", name: "", weightG: "" });
       setEditingId(null);
-      fetchIngredients();
+      fetchPortions();
     } catch (err) {
       setError(err.message);
     }
   }
 
   async function handleDelete(id) {
-    if (!confirm("Deseja deletar este ingrediente?")) return;
+    if (!confirm("Deseja deletar esta porção?")) return;
 
     try {
       const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
@@ -73,25 +84,24 @@ export default function IngredientPage() {
         const data = await res.json();
         throw new Error(data.error || "Erro ao deletar");
       }
-      fetchIngredients();
+      fetchPortions();
     } catch (err) {
       setError(err.message);
     }
   }
 
-  function handleEdit(ing) {
-    setEditingId(ing.id);
+  function handleEdit(portion) {
+    setEditingId(portion.id);
     setForm({
-      name: ing.name,
-      weightG: ing.weightG,
-      cost: ing.cost,
+      ingredientId: portion.ingredientId,
+      name: portion.name,
+      weightG: portion.weightG,
     });
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleCancel() {
     setEditingId(null);
-    setForm({ name: "", weightG: "", cost: "" });
+    setForm({ ingredientId: "", name: "", weightG: "" });
   }
 
   function handleChange(e) {
@@ -99,18 +109,38 @@ export default function IngredientPage() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "2rem auto", padding: 20 }}>
-      <h2>Ingredientes</h2>
+    <div style={{ maxWidth: 700, margin: "2rem auto", padding: 20 }}>
+      <h2>Porções</h2>
+      <p style={{ color: "#666", marginBottom: 20 }}>
+        Porções são frações de ingredientes com peso e custo calculado
+        automaticamente
+      </p>
 
       <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
+        <select
+          name="ingredientId"
+          value={form.ingredientId}
+          onChange={handleChange}
+          required
+          style={{ marginRight: 8, padding: 8 }}
+        >
+          <option value="">Selecione o ingrediente</option>
+          {ingredients.map((ing) => (
+            <option key={ing.id} value={ing.id}>
+              {ing.name} ({ing.weightG}g - R$ {Number(ing.cost).toFixed(2)})
+            </option>
+          ))}
+        </select>
+
         <input
           name="name"
-          placeholder="Nome"
+          placeholder="Nome da porção"
           value={form.name}
           onChange={handleChange}
           required
           style={{ marginRight: 8 }}
         />
+
         <input
           name="weightG"
           placeholder="Peso (g)"
@@ -120,22 +150,13 @@ export default function IngredientPage() {
           required
           style={{ marginRight: 8 }}
         />
-        <input
-          name="cost"
-          placeholder="Custo"
-          type="number"
-          step="0.01"
-          value={form.cost}
-          onChange={handleChange}
-          required
-          style={{ marginRight: 8 }}
-        />
+
         <button type="submit">{editingId ? "Atualizar" : "Adicionar"}</button>
         {editingId && (
           <button
             type="button"
             onClick={handleCancel}
-            style={{ marginLeft: 4 }}
+            style={{ marginLeft: 8 }}
           >
             Cancelar
           </button>
@@ -149,47 +170,46 @@ export default function IngredientPage() {
       ) : (
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "2px solid #ccc" }}>
+            <tr style={{ borderBottom: "2px solid #ddd" }}>
               <th style={{ textAlign: "left", padding: 8 }}>Nome</th>
-              <th style={{ textAlign: "right", padding: 8 }}>Peso (g)</th>
-              <th style={{ textAlign: "right", padding: 8 }}>Custo (R$)</th>
-              <th style={{ textAlign: "right", padding: 8 }}>Custo/g</th>
+              <th style={{ textAlign: "left", padding: 8 }}>Ingrediente</th>
+              <th style={{ textAlign: "right", padding: 8 }}>Peso</th>
+              <th style={{ textAlign: "right", padding: 8 }}>Custo</th>
               <th style={{ textAlign: "center", padding: 8 }}>Ações</th>
             </tr>
           </thead>
           <tbody>
-            {ingredients.map((ing) => (
-              <tr
-                key={ing.id}
-                style={{
-                  borderBottom: "1px solid #eee",
-                  backgroundColor:
-                    editingId === ing.id ? "#fff9e6" : "transparent",
-                }}
-              >
-                <td style={{ padding: 8 }}>{ing.name}</td>
-                <td style={{ textAlign: "right", padding: 8 }}>
-                  {ing.weightG}
+            {portions.map((portion) => (
+              <tr key={portion.id} style={{ borderBottom: "1px solid #eee" }}>
+                <td style={{ padding: 8 }}>{portion.name}</td>
+                <td style={{ padding: 8 }}>
+                  {portion.ingredient?.name || "N/A"}
                 </td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  {Number(ing.cost).toFixed(2)}
+                  {portion.weightG}g
                 </td>
                 <td style={{ textAlign: "right", padding: 8 }}>
-                  {(Number(ing.cost) / ing.weightG).toFixed(4)}
+                  R$ {Number(portion.cost).toFixed(4)}
                 </td>
                 <td style={{ textAlign: "center", padding: 8 }}>
                   <button
-                    onClick={() => handleEdit(ing)}
+                    onClick={() => handleEdit(portion)}
                     style={{ marginRight: 4 }}
                   >
                     ✏️
                   </button>
-                  <button onClick={() => handleDelete(ing.id)}>🗑️</button>
+                  <button onClick={() => handleDelete(portion.id)}>🗑️</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {!loading && portions.length === 0 && (
+        <p style={{ textAlign: "center", color: "#999", marginTop: 20 }}>
+          Nenhuma porção cadastrada
+        </p>
       )}
 
       <div style={{ marginTop: 30 }}>

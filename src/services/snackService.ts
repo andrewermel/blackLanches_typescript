@@ -2,16 +2,7 @@ import { Prisma } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import prisma from "../lib/prisma.js";
 
-interface SnackWithTotals {
-  id: number;
-  name: string;
-  portions: any[];
-  totalCost: string;
-  totalWeightG: number;
-  suggestedPrice: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { SnackWithTotals } from "../types/entities.js";
 
 const calculateTotals = (portions: any[]) => {
   const totalCostDecimal = portions.reduce(

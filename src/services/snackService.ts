@@ -41,8 +41,9 @@ export class SnackService {
     if (!snack) return null;
 
     const portions = snack.snackPortions.map((sp) => sp.portion);
-    const { totalCost, totalWeightG, suggestedPrice } =
-      calculateTotals(portions as Portion[]);
+    const { totalCost, totalWeightG, suggestedPrice } = calculateTotals(
+      portions as Portion[],
+    );
 
     return {
       id: snack.id,

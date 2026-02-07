@@ -1,6 +1,6 @@
 import { Decimal } from "@prisma/client/runtime/library";
 import prisma from "../lib/prisma.js";
-import type { Portion, Ingredient } from "../types/entities.js";
+import type { Ingredient, Portion } from "../types/entities.js";
 
 const calculatePortionCost = (
   ingredientCost: Decimal,
@@ -13,10 +13,14 @@ const calculatePortionCost = (
 };
 
 export class PortionService {
-  async create(ingredientId: number, name: string, weightG: number): Promise<Portion> {
-    const ingredient = await prisma.ingredient.findUniqueOrThrow({
+  async create(
+    ingredientId: number,
+    name: string,
+    weightG: number,
+  ): Promise<Portion> {
+    const ingredient = (await prisma.ingredient.findUniqueOrThrow({
       where: { id: ingredientId },
-    }) as any;
+    })) as any;
 
     const cost = calculatePortionCost(
       ingredient.cost as Decimal,
@@ -47,11 +51,14 @@ export class PortionService {
     }) as Promise<(Portion & { ingredient: Ingredient }) | null>;
   }
 
-  async update(id: number, data: { name?: string; weightG?: number }): Promise<Portion & { ingredient: Ingredient }> {
-    const existing = await prisma.portion.findUniqueOrThrow({
+  async update(
+    id: number,
+    data: { name?: string; weightG?: number },
+  ): Promise<Portion & { ingredient: Ingredient }> {
+    const existing = (await prisma.portion.findUniqueOrThrow({
       where: { id },
       include: { ingredient: true },
-    }) as any;
+    })) as any;
 
     const updateData: {
       name?: string;

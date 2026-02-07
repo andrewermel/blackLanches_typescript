@@ -3,7 +3,11 @@ import prisma from "../lib/prisma.js";
 import type { Ingredient } from "../types/entities.js";
 
 export class IngredientService {
-  async create(name: string, weightG: number, cost: number): Promise<Ingredient> {
+  async create(
+    name: string,
+    weightG: number,
+    cost: number,
+  ): Promise<Ingredient> {
     return prisma.ingredient.create({
       data: {
         name: name.trim(),

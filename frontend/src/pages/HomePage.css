@@ -45,8 +45,9 @@
 
 .menu-card h3 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: #daa520;
   font-size: 20px;
+  font-weight: 700;
 }
 
 .menu-card p {

@@ -1,4 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Loading } from './components/Loading';
+import { ToastProvider } from './components/Toast';
+import { ROUTES } from './constants';
+import {
+  AuthProvider,
+  useAuth,
+} from './contexts/AuthContext';
 import HomePage from './pages/HomePage.jsx';
 import IngredientPage from './pages/IngredientPage.jsx';
 import Login from './pages/Login.jsx';
@@ -6,48 +13,36 @@ import PortionPage from './pages/PortionPage.jsx';
 import Register from './pages/Register.jsx';
 import SnackPage from './pages/SnackPage.jsx';
 
-export default function App() {
+function AppContent() {
+  const { isAuthenticated, logout, loading } = useAuth();
   const [route, setRoute] = useState('');
-  const [isAuthenticated, setIsAuthenticated] =
-    useState(false);
-  const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Verifica se tem token no localStorage
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
-
-    // Define a rota inicial baseado na autenticação
     const hash = window.location.hash || '';
-    if (token && !hash) {
-      // Se autenticado e sem rota, vai para lanches
-      setRoute('#/snacks');
-      window.location.hash = '#/snacks';
-    } else if (!token && !hash) {
-      // Se não autenticado e sem rota, vai para login
-      setRoute('#/login');
+    if (isAuthenticated && !hash) {
+      window.location.hash = ROUTES.SNACKS;
+      setRoute(ROUTES.SNACKS);
+    } else if (!isAuthenticated && !hash) {
+      window.location.hash = ROUTES.LOGIN;
+      setRoute(ROUTES.LOGIN);
     } else {
       setRoute(hash);
     }
-
-    setLoading(false);
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash || '#/login';
-      const token = localStorage.getItem('token');
+      const hash = window.location.hash || ROUTES.LOGIN;
 
-      setIsAuthenticated(!!token);
-
-      // Se não está autenticado e tenta acessar rota protegida
+      // Redireciona para login se não autenticado e tenta acessar rota protegida
+      const publicRoutes = [ROUTES.LOGIN, ROUTES.REGISTER];
       if (
-        !token &&
-        !['#/login', '#/register'].includes(hash)
+        !isAuthenticated &&
+        !publicRoutes.includes(hash)
       ) {
-        window.location.hash = '#/login';
-        setRoute('#/login');
+        window.location.hash = ROUTES.LOGIN;
+        setRoute(ROUTES.LOGIN);
         return;
       }
 
@@ -60,16 +55,22 @@ export default function App() {
         'hashchange',
         handleHashChange
       );
-  }, []);
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-    window.location.hash = '#/login';
+    logout();
+    setMenuOpen(false);
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
   if (loading) {
-    return <div className="loading">Carregando...</div>;
+    return (
+      <Loading
+        fullScreen
+        message="Carregando aplicação..."
+      />
+    );
   }
 
   return (
@@ -99,52 +100,34 @@ export default function App() {
       <div
         className={`side-menu ${menuOpen ? 'open' : ''}`}
       >
-        <button
-          className="close-menu"
-          onClick={() => setMenuOpen(false)}
-        >
+        <button className="close-menu" onClick={closeMenu}>
           ✕
         </button>
         <nav>
           {!isAuthenticated ? (
             <>
-              <a
-                href="#/login"
-                onClick={() => setMenuOpen(false)}
-              >
+              <a href={ROUTES.LOGIN} onClick={closeMenu}>
                 Login
               </a>
-              <a
-                href="#/register"
-                onClick={() => setMenuOpen(false)}
-              >
+              <a href={ROUTES.REGISTER} onClick={closeMenu}>
                 Cadastro
               </a>
             </>
           ) : (
             <>
-              <a
-                href="#/snacks"
-                onClick={() => setMenuOpen(false)}
-              >
+              <a href={ROUTES.SNACKS} onClick={closeMenu}>
                 🍔 Lanches
               </a>
-              <a
-                href="#/home"
-                onClick={() => setMenuOpen(false)}
-              >
+              <a href={ROUTES.HOME} onClick={closeMenu}>
                 🏠 Home
               </a>
               <a
-                href="#/ingredients"
-                onClick={() => setMenuOpen(false)}
+                href={ROUTES.INGREDIENTS}
+                onClick={closeMenu}
               >
                 🥬 Ingredientes
               </a>
-              <a
-                href="#/portions"
-                onClick={() => setMenuOpen(false)}
-              >
+              <a href={ROUTES.PORTIONS} onClick={closeMenu}>
                 🍽️ Porções
               </a>
             </>
@@ -156,24 +139,35 @@ export default function App() {
       {menuOpen && (
         <div
           className="menu-overlay"
-          onClick={() => setMenuOpen(false)}
+          onClick={closeMenu}
         ></div>
       )}
+
       <main>
-        {route === '#/register' ? (
+        {route === ROUTES.REGISTER ? (
           <Register />
-        ) : route === '#/login' ? (
+        ) : route === ROUTES.LOGIN ? (
           <Login />
-        ) : route === '#/home' ? (
+        ) : route === ROUTES.HOME ? (
           <HomePage />
-        ) : route === '#/ingredients' ? (
+        ) : route === ROUTES.INGREDIENTS ? (
           <IngredientPage />
-        ) : route === '#/portions' ? (
+        ) : route === ROUTES.PORTIONS ? (
           <PortionPage />
         ) : (
           <SnackPage />
         )}
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
+    </AuthProvider>
   );
 }

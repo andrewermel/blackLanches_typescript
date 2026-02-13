@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { API_ENDPOINTS } from '../config/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants';
 import './HomePage.css';
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
     }
 
     // Opcional: validar token com endpoint protegido
-    fetch(API_ENDPOINTS.AUTH.PROTECTED, {
+    fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.ME}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

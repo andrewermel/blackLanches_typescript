@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { API_ENDPOINTS } from '../config/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants';
 import {
   formatCostPerGram,
   formatCurrency,
@@ -7,7 +7,7 @@ import {
 } from '../utils/formatters';
 import './IngredientPage.css';
 
-const API_URL = API_ENDPOINTS.INGREDIENTS;
+const API_URL = `${API_BASE_URL}${API_ENDPOINTS.INGREDIENTS}`;
 
 export default function IngredientPage() {
   const [ingredients, setIngredients] = useState([]);
@@ -129,22 +129,29 @@ export default function IngredientPage() {
       >
         <input
           name="name"
-          placeholder="Nome"
+          placeholder="Nome do ingrediente"
           value={form.name}
           onChange={handleChange}
           required
         />
-        <input
-          name="weightG"
-          placeholder="Peso (g)"
-          type="number"
-          value={form.weightG}
-          onChange={handleChange}
-          required
-        />
+        <div className="input-with-hint">
+          <input
+            name="weightG"
+            placeholder="Peso em gramas (ex: 1000g = 1kg)"
+            type="number"
+            value={form.weightG}
+            onChange={handleChange}
+            required
+            min="1"
+          />
+          <small className="input-hint">
+            💡 Digite o peso em gramas. Exemplo: 1kg =
+            1000g, 500g = 500g
+          </small>
+        </div>
         <input
           name="cost"
-          placeholder="Custo"
+          placeholder="Custo total (R$)"
           type="number"
           step="0.01"
           value={form.cost}

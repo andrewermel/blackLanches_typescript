@@ -6,10 +6,11 @@
 }
 
 .page-title {
-  color: #333;
+  color: #daa520;
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 28px;
+  font-weight: 700;
 }
 
 .page-description {
@@ -24,9 +25,9 @@
   gap: 8px;
   margin-bottom: 24px;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #fafafa;
   border-radius: 8px;
-  border: 1px solid #e6e9ef;
+  border: 2px solid #daa520;
 }
 
 .portion-form select,
@@ -34,10 +35,11 @@
   flex: 1;
   min-width: 150px;
   padding: 10px 12px;
-  border: 1px solid #e6e9ef;
+  border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
   background-color: white;
+  color: #333;
 }
 
 .portion-form select:focus,
@@ -45,6 +47,28 @@
   outline: none;
   border-color: #daa520;
   box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+}
+
+.input-with-hint {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-with-hint input {
+  margin: 0;
+}
+
+.input-hint {
+  color: #555;
+  font-size: 11px;
+  font-style: italic;
+  padding-left: 4px;
+  background-color: rgba(218, 165, 32, 0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .portion-form button {
@@ -76,12 +100,21 @@
   background-color: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid #daa520;
 }
 
 .portion-table thead {
-  background-color: #f9f9f9;
-  border-bottom: 2px solid #e6e9ef;
+  background: linear-gradient(
+    135deg,
+    #daa520 0%,
+    #b8860b 100%
+  );
+  border-bottom: 2px solid #b8860b;
+}
+
+.portion-table thead th {
+  color: white !important;
 }
 
 .portion-table th {

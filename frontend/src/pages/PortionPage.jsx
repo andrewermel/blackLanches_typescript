@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { API_ENDPOINTS } from '../config/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants';
 import {
   formatCurrency,
   formatWeight,
 } from '../utils/formatters';
 import './PortionPage.css';
 
-const API_URL = API_ENDPOINTS.PORTIONS;
-const INGREDIENTS_URL = API_ENDPOINTS.INGREDIENTS;
+const API_URL = `${API_BASE_URL}${API_ENDPOINTS.PORTIONS}`;
+const INGREDIENTS_URL = `${API_BASE_URL}${API_ENDPOINTS.INGREDIENTS}`;
 
 export default function PortionPage() {
   const [portions, setPortions] = useState([]);
@@ -153,20 +153,26 @@ export default function PortionPage() {
 
         <input
           name="name"
-          placeholder="Nome da porção"
+          placeholder="Nome da porção (ex: Hambúrguer 150g)"
           value={form.name}
           onChange={handleChange}
           required
         />
 
-        <input
-          name="weightG"
-          placeholder="Peso (g)"
-          type="number"
-          value={form.weightG}
-          onChange={handleChange}
-          required
-        />
+        <div className="input-with-hint">
+          <input
+            name="weightG"
+            placeholder="Peso em gramas (ex: 150)"
+            type="number"
+            value={form.weightG}
+            onChange={handleChange}
+            required
+            min="1"
+          />
+          <small className="input-hint">
+            💡 Peso da porção em gramas
+          </small>
+        </div>
 
         <button type="submit">
           {editingId ? 'Atualizar' : 'Adicionar'}

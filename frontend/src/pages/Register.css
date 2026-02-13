@@ -7,9 +7,10 @@
 
 .register-title {
   text-align: center;
-  color: #333;
+  color: #daa520;
   margin-top: 0;
   margin-bottom: 20px;
+  font-weight: 700;
 }
 
 .register-form {

@@ -11,6 +11,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] =
     useState(false);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     // Verifica se tem token no localStorage
@@ -74,22 +75,16 @@ export default function App() {
   return (
     <div className="app-container">
       <header>
+        <button
+          className="hamburger-menu"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
         <h1 className="title">BlackLanches</h1>
-        <nav>
-          {!isAuthenticated ? (
-            <>
-              <a href="#/login">Login</a>
-              <a href="#/register">Cadastro</a>
-            </>
-          ) : (
-            <>
-              <a href="#/snacks">Lanches</a>
-              <a href="#/home">Home</a>
-              <a href="#/ingredients">Ingredientes</a>
-              <a href="#/portions">Porções</a>
-            </>
-          )}
-        </nav>
         {isAuthenticated && (
           <button
             className="btn-logout-header"
@@ -99,6 +94,71 @@ export default function App() {
           </button>
         )}
       </header>
+
+      {/* Menu Lateral */}
+      <div
+        className={`side-menu ${menuOpen ? 'open' : ''}`}
+      >
+        <button
+          className="close-menu"
+          onClick={() => setMenuOpen(false)}
+        >
+          ✕
+        </button>
+        <nav>
+          {!isAuthenticated ? (
+            <>
+              <a
+                href="#/login"
+                onClick={() => setMenuOpen(false)}
+              >
+                Login
+              </a>
+              <a
+                href="#/register"
+                onClick={() => setMenuOpen(false)}
+              >
+                Cadastro
+              </a>
+            </>
+          ) : (
+            <>
+              <a
+                href="#/snacks"
+                onClick={() => setMenuOpen(false)}
+              >
+                🍔 Lanches
+              </a>
+              <a
+                href="#/home"
+                onClick={() => setMenuOpen(false)}
+              >
+                🏠 Home
+              </a>
+              <a
+                href="#/ingredients"
+                onClick={() => setMenuOpen(false)}
+              >
+                🥬 Ingredientes
+              </a>
+              <a
+                href="#/portions"
+                onClick={() => setMenuOpen(false)}
+              >
+                🍽️ Porções
+              </a>
+            </>
+          )}
+        </nav>
+      </div>
+
+      {/* Overlay */}
+      {menuOpen && (
+        <div
+          className="menu-overlay"
+          onClick={() => setMenuOpen(false)}
+        ></div>
+      )}
       <main>
         {route === '#/register' ? (
           <Register />

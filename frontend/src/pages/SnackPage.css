@@ -20,7 +20,8 @@
 
 .snack-form {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 24px;
   padding: 20px;
   background-color: #f9f9f9;
@@ -28,7 +29,13 @@
   border: 1px solid #e6e9ef;
 }
 
-.snack-form input {
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.snack-form input[type='text'] {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid #e6e9ef;
@@ -36,10 +43,74 @@
   font-size: 14px;
 }
 
-.snack-form input:focus {
+.snack-form input[type='text']:focus {
   outline: none;
   border-color: #daa520;
   box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+}
+
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #6c757d;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.file-label:hover {
+  background-color: #545b62;
+}
+
+.image-preview-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 8px;
+  border: 2px solid #e6e9ef;
+  object-fit: cover;
+}
+
+.remove-preview {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.remove-preview:hover {
+  background-color: #d32f2f;
 }
 
 .snack-form button {
@@ -305,4 +376,23 @@
 
 .btn-logout:hover {
   background-color: #d32f2f;
+}
+
+/* Imagem do Lanche */
+.snack-image-container {
+  margin-bottom: 20px;
+  text-align: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f9f9f9;
+  border: 1px solid #e6e9ef;
+}
+
+.snack-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
 }

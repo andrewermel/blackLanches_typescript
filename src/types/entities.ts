@@ -1,4 +1,4 @@
-import { Decimal } from "@prisma/client/runtime/library";
+import { Decimal } from '@prisma/client/runtime/library';
 
 export interface Ingredient {
   id: number;
@@ -32,6 +32,7 @@ export interface SnackPortion {
 export interface Snack {
   id: number;
   name: string;
+  imageUrl?: string | null;
   snackPortions?: SnackPortion[];
   createdAt: Date;
   updatedAt: Date;

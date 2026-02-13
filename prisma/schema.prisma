@@ -28,6 +28,7 @@ model Ingredient {
 model Snack {
   id            Int           @id @default(autoincrement())
   name          String        @unique
+  imageUrl      String?
   snackPortions SnackPortion[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

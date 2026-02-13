@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  API_BASE_URL,
   API_ENDPOINTS,
   getSnackPortionUrl,
 } from '../config/api';
@@ -16,6 +17,9 @@ export default function SnackPage() {
   const [snacks, setSnacks] = useState([]);
   const [portions, setPortions] = useState([]);
   const [snackName, setSnackName] = useState('');
+  const [snackImageFile, setSnackImageFile] =
+    useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [selectedSnack, setSelectedSnack] = useState(null);
   const [selectedPortionId, setSelectedPortionId] =
     useState('');
@@ -60,10 +64,16 @@ export default function SnackPage() {
     setError('');
 
     try {
+      const formData = new FormData();
+      formData.append('name', snackName);
+
+      if (snackImageFile) {
+        formData.append('image', snackImageFile);
+      }
+
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: snackName }),
+        body: formData,
       });
 
       if (!res.ok) {
@@ -74,9 +84,25 @@ export default function SnackPage() {
       }
 
       setSnackName('');
+      setSnackImageFile(null);
+      setImagePreview(null);
       fetchSnacks();
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setSnackImageFile(file);
+
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -186,13 +212,52 @@ export default function SnackPage() {
         onSubmit={handleCreateSnack}
         className="snack-form"
       >
-        <input
-          placeholder="Nome do lanche"
-          value={snackName}
-          onChange={e => setSnackName(e.target.value)}
-          required
-        />
-        <button type="submit">Criar Lanche</button>
+        <div className="form-row">
+          <input
+            placeholder="Nome do lanche"
+            value={snackName}
+            onChange={e => setSnackName(e.target.value)}
+            required
+          />
+          <div className="file-input-wrapper">
+            <label
+              htmlFor="image-upload"
+              className="file-label"
+            >
+              📷{' '}
+              {snackImageFile
+                ? snackImageFile.name
+                : 'Escolher imagem'}
+            </label>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="file-input"
+            />
+          </div>
+          <button type="submit">Criar Lanche</button>
+        </div>
+        {imagePreview && (
+          <div className="image-preview-container">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="image-preview"
+            />
+            <button
+              type="button"
+              className="remove-preview"
+              onClick={() => {
+                setSnackImageFile(null);
+                setImagePreview(null);
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </form>
 
       {error && (
@@ -261,6 +326,25 @@ export default function SnackPage() {
         {selectedSnack && (
           <div className="snack-details">
             <h3>{selectedSnack.name}</h3>
+
+            {selectedSnack.imageUrl && (
+              <div className="snack-image-container">
+                <img
+                  src={
+                    selectedSnack.imageUrl.startsWith(
+                      'http'
+                    )
+                      ? selectedSnack.imageUrl
+                      : `${API_BASE_URL}${selectedSnack.imageUrl}`
+                  }
+                  alt={selectedSnack.name}
+                  className="snack-image"
+                  onError={e => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
 
             <div className="snack-summary">
               <div className="snack-summary-item">

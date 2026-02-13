@@ -75,8 +75,11 @@ nav a:hover {
   color: #fff;
 }
 
-/* Botão de sair no header */
-nav button {
+/* Botão de sair no header - Canto superior direito */
+.btn-logout-header {
+  position: absolute;
+  top: 16px;
+  right: 20px;
   background-color: #f44336;
   color: white;
   padding: 8px 16px;
@@ -84,11 +87,14 @@ nav button {
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  z-index: 101;
 }
 
-nav button:hover {
+.btn-logout-header:hover {
   background-color: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.4);
 }
 
 /* ========== MAIN ========== */

@@ -87,10 +87,17 @@ export default function App() {
               <a href="#/home">Home</a>
               <a href="#/ingredients">Ingredientes</a>
               <a href="#/portions">Porções</a>
-              <button onClick={handleLogout}>Sair</button>
             </>
           )}
         </nav>
+        {isAuthenticated && (
+          <button
+            className="btn-logout-header"
+            onClick={handleLogout}
+          >
+            Sair
+          </button>
+        )}
       </header>
       <main>
         {route === '#/register' ? (

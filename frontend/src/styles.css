@@ -8,7 +8,7 @@
 body {
   font-family: Inter, system-ui, sans-serif;
   margin: 0;
-  background: #f5f6fa;
+  background: #000000;
   color: #222;
 }
 .app-container {
@@ -64,4 +64,10 @@ button {
   background: #fff3cd;
   border: 1px solid #ffeeba;
   border-radius: 6px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #daa520;
 }

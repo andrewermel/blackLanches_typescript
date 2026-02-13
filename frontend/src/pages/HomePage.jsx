@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import { API_ENDPOINTS } from "../config/api";
+import { useEffect, useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
-      window.location.hash = "#/login";
+      window.location.hash = '#/login';
       return;
     }
 
@@ -16,23 +16,23 @@ export default function HomePage() {
     fetch(API_ENDPOINTS.AUTH.PROTECTED, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         if (data.user) setUser(data.user);
       })
-      .catch(() => setError("Sessão expirada"));
+      .catch(() => setError('Sessão expirada'));
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.hash = "#/login";
+    localStorage.removeItem('token');
+    window.location.hash = '#/login';
   };
 
   return (
     <div className="card">
       <h2>Dashboard - BlackLanches</h2>
 
-      {error && <div style={{ color: "red" }}>{error}</div>}
+      {error && <div style={{ color: 'red' }}>{error}</div>}
 
       {user && (
         <div style={{ marginBottom: 20 }}>
@@ -42,7 +42,13 @@ export default function HomePage() {
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 20,
+        }}
+      >
         <div className="menu-card">
           <h3>🥬 Ingredientes</h3>
           <p>Gerencie os ingredientes disponíveis</p>
@@ -67,7 +73,10 @@ export default function HomePage() {
           </a>
         </div>
 
-        <button onClick={handleLogout} style={{ marginTop: 20 }}>
+        <button
+          onClick={handleLogout}
+          style={{ marginTop: 20 }}
+        >
           Sair
         </button>
       </div>

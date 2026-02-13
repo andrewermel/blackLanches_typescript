@@ -72,10 +72,12 @@ export default function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container w-full flex flex-col items-center pt-4">
       <header>
-        <h1 className="title">BlackLanches</h1>
-        <nav>
+        <h1 className="title text-2xl font-bold text-amber-500 text-center m-0">
+          BlackLanches
+        </h1>
+        <nav className="menu">
           {!isAuthenticated ? (
             <>
               <a href="#/login">Login</a>
@@ -88,16 +90,8 @@ export default function App() {
               <a href="#/ingredients">Ingredientes</a>
               <a href="#/portions">Porções</a>
               <button
+                className="bt-exit"
                 onClick={handleLogout}
-                style={{
-                  marginLeft: 16,
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  padding: '8px 16px',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                }}
               >
                 Sair
               </button>

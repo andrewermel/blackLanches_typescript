@@ -1,80 +1,280 @@
-# Black Lanches API - TypeScript
+# 🍔 BlackLanches - Sistema de Gestão de Custos para Lanchonete
 
-API RESTful para gerenciamento de ingredientes, porções e lanches, com autenticação JWT.
+<div align="center">
 
-## 🚀 Quick Start
+![BlackLanches Logo](https://img.shields.io/badge/BlackLanches-Sistema_de_Gest%C3%A3o-daa520?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Em_Produ%C3%A7%C3%A3o-success?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-### Instalação
+**Um sistema criado com amor para ajudar famílias empreendedoras a prosperarem** 💛
+
+</div>
+
+---
+
+## 📖 A História Por Trás do BlackLanches
+
+Este projeto nasceu de uma necessidade real, em um momento difícil. Após a enchente que atingiu nossa região, minha família precisou recomeçar do zero. Com coragem e determinação, decidiram abrir um pequeno negócio de lanches para sustentar a casa e reconstruir nossas vidas.
+
+Porém, surgiu um desafio: **como saber se estávamos tendo lucro ou prejuízo?** Como calcular o custo real de cada lanche? Quanto cada ingrediente representava no preço final? Essas perguntas nos motivaram a criar algo que pudesse ajudar não só a nossa família, mas todas as famílias empreendedoras que enfrentam desafios semelhantes.
+
+O **BlackLanches** é mais que um sistema - é uma ferramenta de recomeço, de esperança e de organização para quem quer fazer seu negócio crescer de forma sustentável.
+
+---
+
+## 🎯 O Que o BlackLanches Faz?
+
+O BlackLanches é um sistema completo de gestão de custos para lanchonetes que permite:
+
+### ✨ Funcionalidades Principais
+
+- 📦 **Gestão de Ingredientes**: Cadastre todos os ingredientes com peso e custo
+- 🍽️ **Gestão de Porções**: Crie porções baseadas nos ingredientes (ex: hambúrguer, queijo, pão)
+- 🍔 **Montagem de Lanches**: Monte seus lanches combinando porções
+- 💰 **Cálculo Automático de Custos**: O sistema calcula automaticamente:
+  - Custo total do lanche
+  - Peso total
+  - Preço sugerido de venda (com margem de lucro)
+- 📊 **Visualização Clara**: Interface simples e intuitiva para consultas rápidas
+- 🖼️ **Fotos dos Lanches**: Adicione imagens para facilitar a identificação
+- ✏️ **Edição Fácil**: Edite lanches, porções e ingredientes quando necessário
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+### Backend
+
+- **Node.js** - Ambiente de execução JavaScript
+- **Express** - Framework web rápido e minimalista
+- **TypeScript** - JavaScript com tipagem estática
+- **Prisma ORM** - ORM moderno para PostgreSQL
+- **PostgreSQL** - Banco de dados relacional
+- **JWT** - Autenticação segura
+- **Multer** - Upload de imagens
+
+### Frontend
+
+- **React** - Biblioteca para interfaces de usuário
+- **Vite** - Build tool moderna e rápida
+- **Tailwind CSS** - Framework CSS utilitário
+- **Custom CSS** - Estilização personalizada com tema amarelo/vermelho/preto
+
+### Ferramentas de Desenvolvimento
+
+- **Jest** - Testes unitários
+- **ESLint** - Linter para código JavaScript/TypeScript
+- **Git** - Controle de versão
+
+---
+
+## 📋 Pré-requisitos
+
+Antes de começar, você precisa ter instalado em sua máquina:
+
+- [Node.js](https://nodejs.org/) (versão 18 ou superior)
+- [PostgreSQL](https://www.postgresql.org/) (versão 14 ou superior)
+- [Git](https://git-scm.com/)
+- Um editor de código (recomendamos [VS Code](https://code.visualstudio.com/))
+
+---
+
+## 🚀 Como Instalar e Executar
+
+### 1️⃣ Clone o Repositório
 
 ```bash
-npm install
+git clone https://github.com/seu-usuario/API_BLACKLANCHES.git
+cd API_BLACKLANCHES
 ```
 
-### Configuração
+### 2️⃣ Configure o Banco de Dados
+
+Crie um banco de dados PostgreSQL:
+
+```bash
+# No terminal do PostgreSQL
+createdb blacklanches
+```
+
+### 3️⃣ Configure as Variáveis de Ambiente
 
 Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/blacklanches"
-JWT_SECRET=uma_chave_bem_segura
+# Banco de Dados
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/blacklanches"
+
+# JWT
+JWT_SECRET="sua_chave_secreta_super_segura_aqui"
+
+# Servidor
+PORT=3000
 ```
 
-### Rodando o Projeto
-
-**Apenas o servidor:**
+### 4️⃣ Instale as Dependências
 
 ```bash
-npm run dev
+# Instalar dependências do backend
+npm install
+
+# Instalar dependências do frontend
+cd frontend
+npm install
+cd ..
 ```
 
-**Servidor + Frontend (Vite):**
+### 5️⃣ Execute as Migrações do Banco de Dados
 
 ```bash
+npx prisma migrate dev
+```
+
+### 6️⃣ Inicie o Projeto
+
+```bash
+# Inicia backend e frontend simultaneamente
 npm run dev:all
 ```
 
-**Testes:**
+**Pronto!** 🎉
 
-```bash
-npm test              # Rodar testes uma vez
-npm run test:watch   # Modo watch
-```
+- Backend: http://localhost:3000
+- Frontend: http://localhost:5173
+
+---
+
+## 📱 Como Usar o BlackLanches
+
+### 1. Primeiro Acesso
+
+1. Acesse http://localhost:5173 no seu navegador
+2. Clique em **"Criar conta"**
+3. Preencha seu nome, email e senha
+4. Faça login com suas credenciais
+
+### 2. Cadastrando Ingredientes
+
+![Ingredientes](https://img.shields.io/badge/Passo_1-Ingredientes-daa520?style=for-the-badge)
+
+1. No menu inicial, clique em **"Ingredientes"**
+2. Preencha os dados:
+   - **Nome**: Ex: "Carne Bovina"
+   - **Peso (em gramas)**: Ex: 1000 (para 1kg)
+   - **Custo (R$)**: Ex: 25.00
+3. Clique em **"Criar Ingrediente"**
+
+💡 **Dica**: O peso deve ser em gramas. Se comprou 1kg, digite 1000g.
+
+### 3. Criando Porções
+
+![Porções](https://img.shields.io/badge/Passo_2-Por%C3%A7%C3%B5es-daa520?style=for-the-badge)
+
+1. Vá para **"Porções"**
+2. Preencha:
+   - **Nome da porção**: Ex: "Hambúrguer 120g"
+   - **Escolha o ingrediente**: Ex: "Carne Bovina"
+   - **Peso da porção (em gramas)**: Ex: 120
+3. Clique em **"Criar Porção"**
+
+✨ **O sistema calcula automaticamente o custo da porção baseado no ingrediente!**
+
+### 4. Montando seus Lanches
+
+![Lanches](https://img.shields.io/badge/Passo_3-Lanches-daa520?style=for-the-badge)
+
+1. Acesse **"Lanches"**
+2. Preencha o nome do lanche: Ex: "X-Bacon"
+3. Adicione uma foto (opcional)
+4. **Adicione as porções**:
+   - Selecione uma porção (Ex: "Hambúrguer 120g")
+   - Clique em **"➕ Adicionar"**
+   - Adicione todas as porções necessárias
+5. Veja o resumo em tempo real:
+   - Total de porções
+   - Peso total
+   - **Custo total** 💰
+   - **Preço sugerido de venda** (com margem de lucro) 💵
+6. Clique em **"✨ Criar Lanche"**
+
+### 5. Visualizando e Editando
+
+- **Ver detalhes**: Clique no ícone 📋 ao lado do lanche
+- **Editar**: Clique no ícone ✏️ para modificar
+- **Deletar**: Clique no ícone 🗑️ para remover
+
+---
+
+## 💡 Dicas de Uso
+
+### 📊 Como Interpretar os Custos
+
+- **Custo Total**: Quanto você gasta para fazer 1 unidade do lanche
+- **Preço Sugerido**: O sistema sugere vender por 2x o custo (100% de lucro)
+- **Você pode vender por mais ou menos** dependendo do seu mercado!
+
+### 🎯 Exemplo Prático
+
+**Ingredientes:**
+
+- Carne (1kg) = R$ 25,00
+- Queijo (1kg) = R$ 35,00
+- Pão (10 unidades) = R$ 8,00
+
+**Porções:**
+
+- Hambúrguer 120g = R$ 3,00
+- Queijo 40g = R$ 1,40
+- Pão 100g = R$ 0,80
+
+**Lanche X-Bacon:**
+
+- 1x Hambúrguer 120g = R$ 3,00
+- 2x Queijo 40g = R$ 2,80
+- 1x Pão 100g = R$ 0,80
+- **Custo Total: R$ 6,60**
+- **Preço Sugerido: R$ 13,20**
+
+Se você vender por R$ 15,00, terá **R$ 8,40 de lucro** por lanche! 💰
+
+---
 
 ## 📁 Estrutura do Projeto
 
 ```
-src/
-├── controllers/       # Controladores (validação + resposta)
-├── services/         # Lógica de negócios (Prisma)
-├── middlewares/      # JWT authentication
-├── routes/           # Definição de rotas
-├── helpers/          # Funções reutilizáveis (errorHandler, validators)
-├── types/            # TypeScript types
-├── lib/              # Configurações (PrismaClient)
-└── index.ts          # Servidor principal
-
-frontend/
-├── src/
-│   ├── pages/        # Componentes de página (Login, Register, Ingredientes)
-│   ├── App.jsx
-│   └── main.jsx
-└── vite.config.js
+API_BLACKLANCHES/
+├── frontend/              # Aplicação React
+│   ├── src/
+│   │   ├── components/   # Componentes reutilizáveis
+│   │   ├── contexts/     # Context API (autenticação)
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── pages/        # Páginas da aplicação
+│   │   ├── services/     # Serviços de API
+│   │   ├── utils/        # Funções utilitárias
+│   │   └── constants/    # Constantes e configurações
+│   └── public/           # Arquivos estáticos
+├── src/                  # Backend Node.js/TypeScript
+│   ├── controllers/      # Controladores das rotas
+│   ├── services/         # Lógica de negócio
+│   ├── routes/           # Definição de rotas
+│   ├── middlewares/      # Middlewares (autenticação, etc)
+│   ├── types/            # Tipos TypeScript
+│   └── helpers/          # Funções auxiliares
+├── prisma/               # Schema e migrações do banco
+│   ├── schema.prisma     # Modelo do banco de dados
+│   └── migrations/       # Histórico de migrações
+└── uploads/              # Imagens dos lanches
 ```
 
-## 📚 Stack Tecnológico
-
-- **Backend**: Node.js + Express + TypeScript
-- **Banco de Dados**: PostgreSQL + Prisma ORM
-- **Autenticação**: JWT (jsonwebtoken)
-- **Segurança**: bcryptjs para hashing de senhas
-- **Frontend**: React + Vite
-- **Testes**: Jest
+---
 
 ## 🔌 Endpoints da API
 
 ### Autenticação
 
 - `POST /api/v1/auth/login` - Login (retorna JWT)
+- `POST /users` - Criar usuário
+- `GET /protected` - Rota protegida (validar token)
 
 ### Ingredientes
 
@@ -101,242 +301,110 @@ frontend/
 - `DELETE /api/v1/snacks/:snackId/portions/:portionId` - Remover porção do lanche
 - `DELETE /api/v1/snacks/:id` - Deletar lanche
 
-## 🏗️ Padrão de Código (Senior Developer)
+---
 
-### Controllers
-
-Responsáveis por:
-
-1. Validar entrada (usando helpers)
-2. Executar lógica do serviço
-3. Retornar resposta
-
-```typescript
-export const createIngredient = async (req, res) => {
-  const { name, weightG, cost } = req.body;
-
-  // Validação centralizada em helpers
-  const nameError = validateRequired(name, "Name");
-  if (nameError) return sendValidationError(nameError, res);
-
-  try {
-    const ingredient = await ingredientService.create(name, weightG, cost);
-    return res.status(201).json(ingredient);
-  } catch (error) {
-    // Erro centralizado
-    return handlePrismaError(error, res);
-  }
-};
-```
-
-### Services
-
-Apenas lógica de banco de dados (Prisma):
-
-```typescript
-async create(name: string, weightG: number, cost: number) {
-  return prisma.ingredient.create({
-    data: { name: name.trim(), weightG, cost: new Decimal(cost) },
-  });
-}
-```
-
-### Helpers
-
-Funções reutilizáveis que eliminam boilerplate:
-
-**errorHandler.ts:**
-
-- `handlePrismaError()` - Mapeia erros Prisma para status HTTP
-- `handleError()` - Trata erros customizados
-
-**validators.ts:**
-
-- `validateRequired()` - Valida campos obrigatórios
-- `validatePositive()` - Valida números positivos
-- `validateNonNegative()` - Valida números >= 0
-- `sendValidationError()` - Retorna erro de validação
-
-## 🧪 Testes (25/25 ✅)
+## 🧪 Executando os Testes
 
 ```bash
+# Testes do backend
 npm test
+
+# Testes com coverage
+npm run test:coverage
+
+# Testes em modo watch
+npm run test:watch
 ```
 
-Cobertura:
-
-- ✅ authController (login, validações)
-- ✅ ingredientController (CRUD)
-- ✅ portionController (CRUD)
-- ✅ snackController (CRUD + porções)
-- ✅ authenticateJWT (middleware)
-
-## 🔐 TypeScript Strict Mode
-
-- ✅ `strict: true` habilitado
-- ✅ `noUncheckedIndexedAccess` habilitado
-- ✅ `exactOptionalPropertyTypes` habilitado
-- ✅ Sem `any` types
-- ✅ Type guards implementados
-
-## 📊 Tipos Principais
-
-```typescript
-// JWT Payload
-interface JwtPayload {
-  userId: number;
-  email: string;
-}
-
-// Error Handling
-interface PrismaError extends Error {
-  code?: string;
-}
-
-type PrismaErrorCode = "P2002" | "P2025" | "P2003";
-```
-
-## 🔄 Fluxo de Requisição
-
-```
-Request
-  ↓
-[Express Middleware] - CORS, JSON parsing
-  ↓
-[Validação] - validateRequired(), validatePositive(), etc
-  ↓
-[Controller] - recebe e valida dados
-  ↓
-[Service] - executa lógica (Prisma)
-  ↓
-[Error Handler] - handlePrismaError() ou handleError()
-  ↓
-Response
-```
-
-## 💾 Banco de Dados
-
-### Schema Prisma
-
-```prisma
-model Ingredient {
-  id      Int @id @default(autoincrement())
-  name    String @unique
-  weightG Int
-  cost    Decimal @db.Decimal(10,4)
-}
-
-model Portion {
-  id           Int @id @default(autoincrement())
-  ingredient   Ingredient @relation(fields: [ingredientId])
-  ingredientId Int
-  name         String
-  weightG      Int
-  cost         Decimal @db.Decimal(10,4)
-}
-
-model Snack {
-  id            Int @id @default(autoincrement())
-  name          String @unique
-  snackPortions SnackPortion[]
-}
-
-model SnackPortion {
-  id        Int @id @default(autoincrement())
-  snack     Snack @relation(fields: [snackId])
-  snackId   Int
-  portion   Portion @relation(fields: [portionId])
-  portionId Int
-}
-```
-
-### Migrations
-
-```bash
-npx prisma migrate dev        # Criar/aplicar migrations
-npx prisma generate          # Gerar Prisma Client
-npx prisma studio            # Interface visual do banco
-```
-
-## 🎯 Principais Features
-
-✅ **Tipagem TypeScript Completa** - Sem `any` types  
-✅ **Error Handling Centralizado** - Um lugar para gerenciar erros  
-✅ **Validação Reutilizável** - Helpers para validação comum  
-✅ **Código Senior-Grade** - Limpo, simples e manutenível  
-✅ **Testes Completos** - 25 testes passando  
-✅ **Prisma ORM** - Type-safe database queries  
-✅ **JWT Auth** - Autenticação segura  
-✅ **CORS Ativado** - Pronto para frontend
-
-## 📝 Padrões de Resposta
-
-### Sucesso
-
-```json
-{
-  "id": 1,
-  "name": "Pão",
-  "weightG": 100,
-  "cost": "2.5000"
-}
-```
-
-### Erro
-
-```json
-{
-  "error": "Name is required."
-}
-```
-
-### Status HTTP
-
-- `201` - Criado com sucesso
-- `200` - OK
-- `400` - Validação falhou
-- `401` - Unauthorized (JWT inválido)
-- `404` - Não encontrado
-- `409` - Conflict (ex: email duplicado)
-- `500` - Erro interno
-
-## 🚀 Deployment
-
-```bash
-# Build para produção
-npm run build
-
-# Rodar servidor em produção
-NODE_ENV=production npm start
-```
-
-## 📞 Variáveis de Ambiente
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-JWT_SECRET=sua_chave_secreta_super_segura
-NODE_ENV=development|production
-```
-
-## 🤝 Contribuindo
-
-1. Sempre manter `npm test` passando (25/25)
-2. Usar padrão de validação com helpers
-3. Centralizar erro handling
-4. Manter TypeScript strict mode
-
-## ✨ Melhorias Futuras
-
-- [ ] Rate limiting
-- [ ] Cache com Redis
-- [ ] Logs estruturados
-- [ ] API versioning
-- [ ] Documentação Swagger/OpenAPI
-- [ ] GraphQL alternativo
+**Cobertura atual: 25/25 testes passando ✅**
 
 ---
 
-**Última atualização**: 7 de fevereiro de 2026  
-**Versão**: 1.0.0  
+## 🐛 Solução de Problemas
+
+### Problema: "Erro ao conectar ao banco de dados"
+
+**Solução**: Verifique se o PostgreSQL está rodando e se a `DATABASE_URL` no `.env` está correta.
+
+### Problema: "Cannot find module"
+
+**Solução**: Execute `npm install` novamente no diretório raiz e na pasta frontend.
+
+### Problema: "Port 3000 already in use"
+
+**Solução**: Mude a porta no arquivo `.env` ou encerre o processo que está usando a porta 3000.
+
+### Problema: "Token inválido"
+
+**Solução**: Faça logout e login novamente. O token pode ter expirado.
+
+### Problema: "Valores zerados nos lanches"
+
+**Solução**: Certifique-se de que as porções foram adicionadas antes de salvar o lanche. Recarregue a página para ver os valores atualizados.
+
+---
+
+## 🤝 Como Contribuir
+
+Contribuições são muito bem-vindas! Este projeto foi criado para ajudar famílias empreendedoras, e sua ajuda pode fazer a diferença.
+
+1. Faça um Fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+---
+
+## 📝 Roadmap de Melhorias Futuras
+
+- [ ] Relatórios de vendas e lucro
+- [ ] Controle de estoque de ingredientes
+- [ ] Histórico de vendas diárias
+- [ ] Exportação de dados para Excel
+- [ ] Aplicativo mobile (React Native)
+- [ ] Modo escuro
+- [ ] Multi-idiomas (Português, Espanhol, Inglês)
+- [ ] Integração com impressora de comandas
+- [ ] Dashboard com gráficos de lucro
+- [ ] Gestão de fornecedores
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 💖 Agradecimentos
+
+Este projeto é dedicado à minha família, que encontrou forças para recomeçar após a enchente. Que o BlackLanches ajude muitas outras famílias a prosperarem e alcançarem seus sonhos.
+
+**Para todas as famílias empreendedoras: não desistam! 💪**
+
+---
+
+## 📞 Contato
+
+Se você tem dúvidas, sugestões ou quer compartilhar sua história de uso do BlackLanches, entre em contato!
+
+---
+
+<div align="center">
+
+**Feito com ❤️ por uma família que acredita no recomeço**
+
+![Família](https://img.shields.io/badge/Para_Fam%C3%ADlias-Empreendedoras-daa520?style=for-the-badge)
+![Recomeço](https://img.shields.io/badge/Recomeço-Sempre_Possível-success?style=for-the-badge)
+
+⭐ Se este projeto ajudou você, considere dar uma estrela!
+
+</div>
+
+---
+
+**Última atualização**: 13 de fevereiro de 2026  
+**Versão**: 2.0.0  
 **Prisma**: 6.19.2  
-**Node**: 24.13.0+
+**Node**: 18.0.0+

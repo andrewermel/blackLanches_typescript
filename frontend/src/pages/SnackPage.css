@@ -44,7 +44,7 @@
 
 .snack-form button {
   padding: 10px 20px;
-  background-color: #daa520;
+  background-color: #f44336;
   color: white;
   border: none;
   border-radius: 6px;
@@ -54,7 +54,7 @@
 }
 
 .snack-form button:hover {
-  background-color: #b8860b;
+  background-color: #720404;
 }
 
 .snack-layout {

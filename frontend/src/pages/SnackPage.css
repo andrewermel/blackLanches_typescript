@@ -1,0 +1,308 @@
+/* Snack Page Styles */
+
+.snack-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-title {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.page-description {
+  color: #666;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.snack-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e6e9ef;
+}
+
+.snack-form input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e6e9ef;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.snack-form input:focus {
+  outline: none;
+  border-color: #daa520;
+  box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+}
+
+.snack-form button {
+  padding: 10px 20px;
+  background-color: #daa520;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.snack-form button:hover {
+  background-color: #b8860b;
+}
+
+.snack-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.snack-list {
+  flex: 1;
+}
+
+.snack-list h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.snack-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.snack-card {
+  border: 2px solid #e6e9ef;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.snack-card:hover {
+  border-color: #daa520;
+  box-shadow: 0 2px 8px rgba(218, 165, 32, 0.2);
+}
+
+.snack-card.selected {
+  background-color: #f0f8ff;
+  border-color: #daa520;
+}
+
+.snack-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.snack-card-info {
+  flex: 1;
+}
+
+.snack-card-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.snack-card-meta {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.snack-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.snack-card-actions button {
+  padding: 6px 12px;
+  background-color: transparent;
+  border: 1px solid #e6e9ef;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.snack-card-actions button:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.snack-details {
+  flex: 1;
+  border: 2px solid #daa520;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: white;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+.snack-details h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
+.snack-summary {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #daa520;
+}
+
+.snack-summary-item {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.snack-summary-item:last-child {
+  margin-bottom: 0;
+  font-size: 18px;
+  color: #2e7d32;
+}
+
+.portions-section h4 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.portions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.portion-item {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.portion-item:hover {
+  background-color: #f9f9f9;
+}
+
+.portion-item:last-child {
+  border-bottom: none;
+}
+
+.portion-info {
+  color: #333;
+  font-size: 14px;
+}
+
+.portion-item button {
+  padding: 4px 8px;
+  background-color: transparent;
+  border: 1px solid #f44336;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.portion-item button:hover {
+  background-color: #ffebee;
+  transform: scale(1.1);
+}
+
+.empty-portions {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+.add-portion-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e6e9ef;
+}
+
+.add-portion-form select {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e6e9ef;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.add-portion-form select:focus {
+  outline: none;
+  border-color: #daa520;
+  box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+}
+
+.add-portion-form button {
+  padding: 10px 20px;
+  background-color: #daa520;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.add-portion-form button:hover {
+  background-color: #b8860b;
+}
+
+.bottom-actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e6e9ef;
+  display: flex;
+  gap: 8px;
+}
+
+.bottom-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-back {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-back:hover {
+  background-color: #545b62;
+}
+
+.btn-logout {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-logout:hover {
+  background-color: #d32f2f;
+}

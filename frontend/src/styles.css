@@ -2,108 +2,244 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =================================
+   ESTILOS GLOBAIS - BlackLanches
+   ================================= */
+
+/* Reset básico */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
+/* Body - Fundo preto */
 body {
   font-family: Inter, system-ui, sans-serif;
   margin: 0;
   background: #000000;
   color: #222;
+  min-height: 100vh;
 }
+
+/* Container principal da aplicação */
 .app-container {
-  max-width: 480px;
-  margin: 40px auto;
-  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  min-height: 100vh;
 }
+
+/* ========== HEADER ========== */
 header {
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #000000;
+  z-index: 100;
+  padding: 16px 20px;
+  border-bottom: 2px solid #daa520;
+  box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
 }
+
+/* Título BlackLanches - Dourado */
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #daa520;
+  text-align: center;
+  margin: 0 0 12px 0;
+}
+
+/* Navegação */
+nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 nav a {
-  margin-left: 8px;
   color: #daa520;
   text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
+
+nav a:hover {
+  background-color: rgba(218, 165, 32, 0.1);
+  color: #fff;
+}
+
+/* Botão de sair no header */
+nav button {
+  background-color: #f44336;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+  background-color: #d32f2f;
+}
+
+/* ========== MAIN ========== */
+main {
+  padding-top: 140px; /* Espaço para o header fixo */
+  padding-bottom: 40px;
+  min-height: calc(100vh - 140px);
+}
+
+/* ========== CARD (Quadrado branco) ========== */
 .card {
-  background: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.08);
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(16, 24, 40, 0.12);
+  margin: 20px auto;
+  max-width: 1000px;
 }
+
 .card h2 {
   margin-top: 0;
+  color: #333;
+  font-size: 24px;
 }
+
+/* ========== FORMS ========== */
 form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+
 label {
   display: flex;
   flex-direction: column;
   font-size: 14px;
+  font-weight: 600;
+  color: #333;
 }
-input {
-  padding: 8px 10px;
+
+input,
+select {
+  padding: 10px 12px;
   border: 1px solid #e6e9ef;
   border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  transition: border-color 0.3s ease;
 }
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #daa520;
+  box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+}
+
+/* ========== BUTTONS ========== */
 button {
-  padding: 10px 12px;
-  background: #2563eb;
+  padding: 10px 16px;
+  background: #daa520;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
+
+button:hover {
+  background: #b8860b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========== MENSAGENS ========== */
 .message {
-  padding: 8px;
+  padding: 12px;
   background: #fff3cd;
   border: 1px solid #ffeeba;
   border-radius: 6px;
+  color: #856404;
+  margin-bottom: 16px;
 }
 
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #daa520;
-  text-align: left;
-  margin: 0;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #ff0000;
-  width: 100%;
-  padding: 10px;
-}
-
-.bt-exit {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #daa520;
-  color: #fff;
-  border: none;
+.error-message {
+  padding: 12px;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
   border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  margin-left: 16px;
-  color: white;
-  padding: 8px 16px;
-  border: none;
+  color: #d32f2f;
+  margin-bottom: 16px;
 }
 
-.bt-exit:hover {
-  background-color: #b8860b; /* darker yellow */
+.success-message {
+  padding: 12px;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  color: #2e7d32;
+  margin-bottom: 16px;
 }
 
-.main {
-  margin-top: 0;
+/* ========== LOADING ========== */
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 16px;
 }
 
-.menu {
-  margin-top: 0;
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 0 12px;
+  }
+
+  .card {
+    padding: 16px;
+    margin: 12px auto;
+  }
+
+  header {
+    padding: 12px 16px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  nav {
+    gap: 8px;
+  }
+
+  nav a {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  main {
+    padding-top: 120px;
+  }
 }

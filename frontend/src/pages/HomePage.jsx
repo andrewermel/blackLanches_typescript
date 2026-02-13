@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { API_ENDPOINTS } from '../config/api';
+import './HomePage.css';
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
@@ -29,26 +30,22 @@ export default function HomePage() {
   };
 
   return (
-    <div className="card">
-      <h2>Dashboard - BlackLanches</h2>
+    <div className="card home-container">
+      <h2>BlackLanches</h2>
 
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && (
+        <div className="error-message">{error}</div>
+      )}
 
       {user && (
-        <div style={{ marginBottom: 20 }}>
-          <p>
+        <div className="welcome-section">
+          <p className="welcome-text">
             <strong>Bem-vindo:</strong> {user.email}
           </p>
         </div>
       )}
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 20,
-        }}
-      >
+      <div className="menu-grid">
         <div className="menu-card">
           <h3>🥬 Ingredientes</h3>
           <p>Gerencie os ingredientes disponíveis</p>
@@ -74,8 +71,8 @@ export default function HomePage() {
         </div>
 
         <button
+          className="logout-btn"
           onClick={handleLogout}
-          style={{ marginTop: 20 }}
         >
           Sair
         </button>

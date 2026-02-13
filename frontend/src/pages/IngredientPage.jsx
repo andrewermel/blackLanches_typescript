@@ -1,24 +1,29 @@
-import { useEffect, useState } from "react";
-import { API_ENDPOINTS } from "../config/api";
+import { useEffect, useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import {
-    formatCostPerGram,
-    formatCurrency,
-    formatWeight,
-} from "../utils/formatters";
+  formatCostPerGram,
+  formatCurrency,
+  formatWeight,
+} from '../utils/formatters';
+import './IngredientPage.css';
 
 const API_URL = API_ENDPOINTS.INGREDIENTS;
 
 export default function IngredientPage() {
   const [ingredients, setIngredients] = useState([]);
-  const [form, setForm] = useState({ name: "", weightG: "", cost: "" });
+  const [form, setForm] = useState({
+    name: '',
+    weightG: '',
+    cost: '',
+  });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
-      window.location.hash = "#/login";
+      window.location.hash = '#/login';
       return;
     }
     fetchIngredients();
@@ -31,7 +36,7 @@ export default function IngredientPage() {
       const data = await res.json();
       setIngredients(data);
     } catch (err) {
-      setError("Erro ao buscar ingredientes");
+      setError('Erro ao buscar ingredientes');
     } finally {
       setLoading(false);
     }
@@ -39,7 +44,7 @@ export default function IngredientPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
+    setError('');
 
     const payload = {
       name: form.name,
@@ -48,21 +53,25 @@ export default function IngredientPage() {
     };
 
     try {
-      const url = editingId ? `${API_URL}/${editingId}` : API_URL;
-      const method = editingId ? "PUT" : "POST";
+      const url = editingId
+        ? `${API_URL}/${editingId}`
+        : API_URL;
+      const method = editingId ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Erro ao salvar ingrediente");
+        throw new Error(
+          data.error || 'Erro ao salvar ingrediente'
+        );
       }
 
-      setForm({ name: "", weightG: "", cost: "" });
+      setForm({ name: '', weightG: '', cost: '' });
       setEditingId(null);
       fetchIngredients();
     } catch (err) {
@@ -71,13 +80,16 @@ export default function IngredientPage() {
   }
 
   async function handleDelete(id) {
-    if (!confirm("Deseja deletar este ingrediente?")) return;
+    if (!confirm('Deseja deletar este ingrediente?'))
+      return;
 
     try {
-      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Erro ao deletar");
+        throw new Error(data.error || 'Erro ao deletar');
       }
       fetchIngredients();
     } catch (err) {
@@ -92,12 +104,12 @@ export default function IngredientPage() {
       weightG: ing.weightG,
       cost: ing.cost,
     });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handleCancel() {
     setEditingId(null);
-    setForm({ name: "", weightG: "", cost: "" });
+    setForm({ name: '', weightG: '', cost: '' });
   }
 
   function handleChange(e) {
@@ -105,17 +117,22 @@ export default function IngredientPage() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "2rem auto", padding: 20 }}>
-      <h2>Ingredientes</h2>
+    <div className="card ingredient-container">
+      <h2 className="page-title">Ingredientes</h2>
+      <p className="page-description">
+        Gerencie os ingredientes com peso e custo
+      </p>
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
+      <form
+        onSubmit={handleSubmit}
+        className="ingredient-form"
+      >
         <input
           name="name"
           placeholder="Nome"
           value={form.name}
           onChange={handleChange}
           required
-          style={{ marginRight: 8 }}
         />
         <input
           name="weightG"
@@ -124,7 +141,6 @@ export default function IngredientPage() {
           value={form.weightG}
           onChange={handleChange}
           required
-          style={{ marginRight: 8 }}
         />
         <input
           name="cost"
@@ -134,71 +150,83 @@ export default function IngredientPage() {
           value={form.cost}
           onChange={handleChange}
           required
-          style={{ marginRight: 8 }}
         />
-        <button type="submit">{editingId ? "Atualizar" : "Adicionar"}</button>
+        <button type="submit">
+          {editingId ? 'Atualizar' : 'Adicionar'}
+        </button>
         {editingId && (
           <button
             type="button"
             onClick={handleCancel}
-            style={{ marginLeft: 4 }}
+            className="btn-cancel"
           >
             Cancelar
           </button>
         )}
       </form>
 
-      {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
+      {error && (
+        <div className="error-message">{error}</div>
+      )}
 
       {loading ? (
-        <div>Carregando...</div>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="loading">Carregando...</div>
+      ) : ingredients.length > 0 ? (
+        <table className="ingredient-table">
           <thead>
-            <tr style={{ borderBottom: "2px solid #ccc" }}>
-              <th style={{ textAlign: "left", padding: 8 }}>Nome</th>
-              <th style={{ textAlign: "right", padding: 8 }}>Peso (g)</th>
-              <th style={{ textAlign: "right", padding: 8 }}>Custo (R$)</th>
-              <th style={{ textAlign: "right", padding: 8 }}>Custo/g</th>
-              <th style={{ textAlign: "center", padding: 8 }}>Ações</th>
+            <tr>
+              <th>Nome</th>
+              <th className="text-right">Peso (g)</th>
+              <th className="text-right">Custo (R$)</th>
+              <th className="text-right">Custo/g</th>
+              <th className="text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {ingredients.map((ing) => (
+            {ingredients.map(ing => (
               <tr
                 key={ing.id}
-                style={{
-                  borderBottom: "1px solid #eee",
-                  backgroundColor:
-                    editingId === ing.id ? "#fff9e6" : "transparent",
-                }}
+                className={
+                  editingId === ing.id ? 'editing' : ''
+                }
               >
-                <td style={{ padding: 8 }}>{ing.name}</td>
-                <td style={{ textAlign: "right", padding: 8 }}>
+                <td>{ing.name}</td>
+                <td className="text-right">
                   {formatWeight(ing.weightG)}
                 </td>
-                <td style={{ textAlign: "right", padding: 8 }}>
+                <td className="text-right">
                   R$ {formatCurrency(ing.cost)}
                 </td>
-                <td style={{ textAlign: "right", padding: 8 }}>
-                  R$ {formatCostPerGram(Number(ing.cost), ing.weightG)}
+                <td className="text-right">
+                  R${' '}
+                  {formatCostPerGram(
+                    Number(ing.cost),
+                    ing.weightG
+                  )}
                 </td>
-                <td style={{ textAlign: "center", padding: 8 }}>
-                  <button
-                    onClick={() => handleEdit(ing)}
-                    style={{ marginRight: 4 }}
-                  >
-                    ✏️
-                  </button>
-                  <button onClick={() => handleDelete(ing.id)}>🗑️</button>
+                <td className="text-center">
+                  <div className="action-buttons">
+                    <button onClick={() => handleEdit(ing)}>
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => handleDelete(ing.id)}
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      ) : (
+        <div className="empty-state">
+          Nenhum ingrediente cadastrado
+        </div>
       )}
 
-      <div style={{ marginTop: 30 }}>
+      <div className="back-section">
         <a href="#/home">
           <button>← Voltar ao Menu</button>
         </a>

@@ -68,16 +68,14 @@ export default function App() {
   };
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return <div className="loading">Carregando...</div>;
   }
 
   return (
-    <div className="app-container w-full flex flex-col items-center pt-4">
+    <div className="app-container">
       <header>
-        <h1 className="title text-2xl font-bold text-amber-500 text-center m-0">
-          BlackLanches
-        </h1>
-        <nav className="menu">
+        <h1 className="title">BlackLanches</h1>
+        <nav>
           {!isAuthenticated ? (
             <>
               <a href="#/login">Login</a>
@@ -89,12 +87,7 @@ export default function App() {
               <a href="#/home">Home</a>
               <a href="#/ingredients">Ingredientes</a>
               <a href="#/portions">Porções</a>
-              <button
-                className="bt-exit"
-                onClick={handleLogout}
-              >
-                Sair
-              </button>
+              <button onClick={handleLogout}>Sair</button>
             </>
           )}
         </nav>

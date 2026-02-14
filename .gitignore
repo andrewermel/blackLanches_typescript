@@ -1,7 +1,7 @@
 # Dependências
 node_modules/
-package-lock.json
-yarn.lock
+# package-lock.json should be committed! Only ignore if using yarn
+# yarn.lock should be committed! Only ignore if using npm
 
 # Ambiente
 .env

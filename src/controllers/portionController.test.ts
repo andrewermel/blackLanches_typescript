@@ -1,19 +1,6 @@
 import { jest } from '@jest/globals';
 import { Request, Response } from 'express';
-
-const mockPortionService = {
-  create: jest.fn(),
-  findAll: jest.fn(),
-  findById: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-};
-
-jest.mock('../services/portionService.js', () => ({
-  PortionService: jest
-    .fn()
-    .mockImplementation(() => mockPortionService),
-}));
+import prisma from '../lib/prisma.js';
 
 import {
   createPortion,
@@ -27,6 +14,30 @@ describe('portionController', () => {
   let res: Partial<Response>;
   let json: jest.Mock;
   let status: jest.Mock;
+  let testIngredientId: number;
+
+  beforeAll(async () => {
+    // Criar ingrediente de teste
+    const ingredient = await prisma.ingredient.create({
+      data: {
+        name: 'Test Ingredient for Portions ' + Date.now(),
+        cost: 10.0,
+        weightG: 1000,
+      },
+    });
+    testIngredientId = ingredient.id;
+  });
+
+  afterAll(async () => {
+    // Limpar dados de teste
+    await prisma.portion.deleteMany({
+      where: { ingredientId: testIngredientId },
+    });
+    await prisma.ingredient.delete({
+      where: { id: testIngredientId },
+    });
+    await prisma.$disconnect();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,14 +55,10 @@ describe('portionController', () => {
 
   it('createPortion success returns 201', async () => {
     req.body = {
-      ingredientId: 1,
+      ingredientId: testIngredientId,
       name: 'TestPortion' + Date.now(),
       weightG: 100,
     };
-    mockPortionService.create.mockResolvedValue({
-      id: 999,
-      ...req.body,
-    });
 
     await createPortion(req as Request, res as Response);
 
@@ -62,8 +69,7 @@ describe('portionController', () => {
   });
 
   it('getPortion returns 404 when not found', async () => {
-    req.params = { id: '99' };
-    mockPortionService.findById.mockResolvedValue(null);
+    req.params = { id: '999999' };
 
     await getPortion(req as Request, res as Response);
 
@@ -71,10 +77,6 @@ describe('portionController', () => {
   });
 
   it('listPortions returns array', async () => {
-    mockPortionService.findAll.mockResolvedValue([
-      { id: 1, name: 'P' },
-    ]);
-
     await listPortions({} as Request, res as Response);
 
     expect(status).not.toHaveBeenCalled();
@@ -84,9 +86,6 @@ describe('portionController', () => {
 
   it('deletePortion handles in-use error', async () => {
     req.params = { id: '999999' };
-    mockPortionService.delete.mockRejectedValue(
-      new Error('Portion in use')
-    );
 
     await deletePortion(req as Request, res as Response);
 

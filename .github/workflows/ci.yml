@@ -1,0 +1,314 @@
+# ==========================================
+# 🚀 WORKFLOW DE CI/CD - BLACKLANCHES
+# ==========================================
+# Este arquivo automatiza testes e verificações toda vez que você faz push no GitHub
+# CI = Continuous Integration (Integração Contínua)
+#
+# Por que isso é importante?
+# - Detecta bugs automaticamente antes de ir para produção
+# - Garante que todos os testes passam
+# - Mantém a qualidade do código consistente
+# - Documenta que o projeto está funcionando corretamente
+
+# Nome do workflow que aparecerá no GitHub
+name: CI/CD Pipeline
+
+# ==========================================
+# 📌 QUANDO ESTE WORKFLOW EXECUTA?
+# ==========================================
+# Define os "gatilhos" (triggers) que ativam este workflow
+
+on:
+  # Executa quando você faz PUSH em qualquer branch
+  push:
+    branches:
+      - '**' # '**' significa "todos os branches"
+
+  # Executa quando alguém abre um Pull Request
+  pull_request:
+    branches:
+      - main # Apenas PRs para a branch main
+      - master
+      - develop
+
+  # Permite executar manualmente pelo GitHub (útil para testes)
+  workflow_dispatch:
+
+# ==========================================
+# 🛠️ TRABALHOS (JOBS) DO WORKFLOW
+# ==========================================
+# Um workflow pode ter vários "jobs" que rodam em paralelo ou sequencialmente
+
+jobs:
+  # ========================================
+  # 📝 JOB 1: VERIFICAÇÃO DE CÓDIGO
+  # ========================================
+  # Este job verifica a qualidade do código sem executar testes
+
+  code-quality:
+    # Nome que aparece na interface do GitHub
+    name: 🔍 Verificação de Qualidade
+
+    # Sistema operacional onde o job roda
+    # ubuntu-latest = versão mais recente do Ubuntu (Linux)
+    # Por quê? É gratuito, rápido e a maioria dos servidores usa Linux
+    runs-on: ubuntu-latest
+
+    # ========================================
+    # PASSOS (STEPS) DO JOB
+    # ========================================
+    # Cada step é uma ação individual executada em sequência
+
+    steps:
+      # -------------------------------------
+      # PASSO 1: Baixar o código do repositório
+      # -------------------------------------
+      # actions/checkout é uma ação oficial do GitHub
+      # Ela baixa seu código para o ambiente de execução
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+        # @v4 = versão 4 da ação (sempre use a mais recente)
+
+      # -------------------------------------
+      # PASSO 2: Configurar Node.js
+      # -------------------------------------
+      # Instala o Node.js no ambiente de execução
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Versão do Node.js (mesma que você usa localmente)
+          node-version: '20'
+
+          # Cache de dependências = guarda node_modules para acelerar
+          # Se package-lock.json não mudou, reutiliza instalação anterior
+          cache: 'npm'
+
+      # -------------------------------------
+      # PASSO 3: Instalar dependências
+      # -------------------------------------
+      # Instala todos os pacotes do package.json
+      - name: 📦 Instalar dependências
+        run: npm ci
+        # 'npm ci' é mais rápido e confiável que 'npm install' em CI
+        # Ele usa o package-lock.json exatamente como está
+
+      # -------------------------------------
+      # PASSO 4: Verificar formatação com ESLint
+      # -------------------------------------
+      # ESLint analisa o código procurando problemas
+      - name: 🎨 Verificar ESLint
+        run: npm run lint --if-present
+        # --if-present = não falha se o script não existir
+        continue-on-error: true
+        # continue-on-error: true = não para o workflow se der erro
+        # Útil quando ESLint está configurado mas não é crítico
+
+      # -------------------------------------
+      # PASSO 5: Verificar tipos TypeScript
+      # -------------------------------------
+      # TypeScript verifica se os tipos estão corretos
+      - name: 🔷 Verificar tipos TypeScript
+        run: npx tsc --noEmit
+        # --noEmit = apenas verifica, não compila nada
+        # Detecta erros de tipo antes de rodar os testes
+
+  # ========================================
+  # 🧪 JOB 2: TESTES
+  # ========================================
+  # Este job executa todos os testes da aplicação
+
+  test:
+    # Nome do job
+    name: 🧪 Executar Testes
+
+    # Sistema operacional
+    runs-on: ubuntu-latest
+
+    # ========================================
+    # DEPENDÊNCIAS DE JOBS
+    # ========================================
+    # Este job SÓ executa se 'code-quality' passar
+    # Por quê? Não adianta testar código com erros óbvios
+    needs: code-quality
+
+    # ========================================
+    # VARIÁVEIS DE AMBIENTE
+    # ========================================
+    # Configurações necessárias para os testes rodarem
+    env:
+      # NODE_ENV = ambiente de execução
+      NODE_ENV: test
+
+      # JWT_SECRET = chave secreta para testes de autenticação
+      # Em produção, isso vem de secrets do GitHub (nunca comite!)
+      JWT_SECRET: test-secret-key-for-ci
+
+      # DATABASE_URL = conexão com banco de dados de testes
+      # Aqui usamos um banco PostgreSQL em memória ou mock
+      # ATENÇÃO: Ajuste isso conforme sua estratégia de testes
+      DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+    # ========================================
+    # SERVIÇOS (SERVICES)
+    # ========================================
+    # Containers Docker que rodam junto com o job
+    # Útil para bancos de dados de teste
+    services:
+      # -------------------------------------
+      # PostgreSQL para testes
+      # -------------------------------------
+      postgres:
+        # Imagem Docker oficial do PostgreSQL
+        image: postgres:15
+
+        # Variáveis de ambiente do container
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+
+        # Verificação de saúde = espera o banco estar pronto
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+        # Mapeia porta do container para o host
+        ports:
+          - 5432:5432
+
+    steps:
+      # Mesmos passos iniciais do job anterior
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Instalar dependências
+        run: npm ci
+
+      # -------------------------------------
+      # PASSO NOVO: Configurar banco de dados
+      # -------------------------------------
+      # Roda as migrations do Prisma para criar as tabelas
+      - name: 🗄️ Configurar banco de dados
+        run: npx prisma migrate deploy
+        # migrate deploy = aplica migrations sem criar novas
+        # Perfeito para CI/CD
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+      # -------------------------------------
+      # PASSO PRINCIPAL: Executar testes
+      # -------------------------------------
+      - name: 🧪 Executar testes
+        run: npm test
+        # Executa todos os 25 testes que configuramos
+        # Se algum falhar, o workflow inteiro falha
+
+      # -------------------------------------
+      # PASSO OPCIONAL: Gerar relatório de cobertura
+      # -------------------------------------
+      # Cobertura = quanto % do código está testado
+      - name: 📊 Gerar cobertura de testes
+        run: npm test -- --coverage
+        continue-on-error: true
+        # continue-on-error porque cobertura é informativa, não crítica
+
+      # -------------------------------------
+      # PASSO OPCIONAL: Upload da cobertura
+      # -------------------------------------
+      # Envia relatório de cobertura como artefato do GitHub
+      - name: 📤 Upload de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        # if: always() = roda mesmo se testes falharem
+        with:
+          name: coverage-report
+          path: coverage/
+          # Fica disponível por 7 dias na aba Actions
+          retention-days: 7
+
+  # ========================================
+  # 🏗️ JOB 3: BUILD
+  # ========================================
+  # Testa se a aplicação compila para produção
+
+  build:
+    name: 🏗️ Build de Produção
+    runs-on: ubuntu-latest
+
+    # Só executa se os testes passarem
+    needs: test
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Instalar dependências
+        run: npm ci
+
+      # -------------------------------------
+      # Compilar TypeScript
+      # -------------------------------------
+      - name: 🔨 Compilar TypeScript
+        run: npx tsc
+        # Compila todo o código TypeScript para JavaScript
+        # Verifica se não há erros de compilação
+
+      # -------------------------------------
+      # Salvar build como artefato
+      # -------------------------------------
+      - name: 📦 Salvar build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          # O código compilado fica disponível para download
+          retention-days: 7
+
+# ==========================================
+# 📌 RESUMO DO FLUXO
+# ==========================================
+#
+# 1. Você faz 'git push'
+# 2. GitHub detecta e inicia o workflow
+# 3. Job 'code-quality':
+#    - Baixa código
+#    - Instala dependências
+#    - Verifica ESLint
+#    - Verifica TypeScript
+# 4. Job 'test' (se anterior passar):
+#    - Sobe banco PostgreSQL
+#    - Roda migrations
+#    - Executa todos os testes
+#    - Gera relatório de cobertura
+# 5. Job 'build' (se testes passarem):
+#    - Compila para produção
+#    - Salva artefatos
+# 6. Resultado: ✅ ou ❌ visível no GitHub
+#
+# ==========================================
+# 🎯 BENEFÍCIOS
+# ==========================================
+#
+# ✅ Detecta bugs antes de chegar em produção
+# ✅ Garante que testes sempre passam
+# ✅ Verifica qualidade automaticamente
+# ✅ Documenta que o projeto funciona
+# ✅ Badge de status no README
+# ✅ Histórico de todas as execuções
+# ✅ 100% GRATUITO para repositórios públicos
+#
+# ==========================================

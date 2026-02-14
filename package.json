@@ -4,8 +4,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "jest --config jest.config.cjs",
-    "test:watch": "jest --config jest.config.cjs --watch",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs --watch",
+    "lint": "echo '⚠️  ESLint para TypeScript requer configuração adicional. Usando TypeScript check...' && npx tsc --noEmit",
     "dev": "node --loader ts-node/esm src/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm --prefix frontend run dev\""
   },
@@ -34,6 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.2.0",

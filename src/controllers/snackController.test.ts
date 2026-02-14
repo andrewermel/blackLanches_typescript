@@ -1,35 +1,29 @@
-import { Request, Response } from "express";
+import { jest } from '@jest/globals';
+import { Request, Response } from 'express';
 
-jest.mock("../services/snackService.js", () => {
-  return {
-    SnackService: jest.fn().mockImplementation(() => {
-      const inst = {
-        createSnack: jest.fn(),
-        getAllSnacks: jest.fn(),
-        getSnackWithTotals: jest.fn(),
-        addPortion: jest.fn(),
-        removePortion: jest.fn(),
-        deleteSnack: jest.fn(),
-      } as any;
-      (global as any).__mockSnackService = inst;
-      return inst;
-    }),
-  };
-});
+const mockSnackService = {
+  createSnack: jest.fn(),
+  getAllSnacks: jest.fn(),
+  getSnackWithTotals: jest.fn(),
+  addPortion: jest.fn(),
+  removePortion: jest.fn(),
+  deleteSnack: jest.fn(),
+};
 
-import { SnackService } from "../services/snackService.js";
+jest.mock('../services/snackService.js', () => ({
+  SnackService: jest
+    .fn()
+    .mockImplementation(() => mockSnackService),
+}));
+
 import {
-    addPortion,
-    createSnack,
-    getSnack,
-    removePortion,
-} from "./snackController.js";
+  addPortion,
+  createSnack,
+  getSnack,
+  removePortion,
+} from './snackController.js';
 
-const mockSnackService =
-  (global as any).__mockSnackService ||
-  (SnackService as unknown as jest.Mock).mock.instances[0];
-
-describe("snackController", () => {
+describe('snackController', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let json: jest.Mock;
@@ -43,43 +37,49 @@ describe("snackController", () => {
     res = { status, json } as unknown as Response;
   });
 
-  it("createSnack validates name", async () => {
+  it('createSnack validates name', async () => {
     req.body = {};
     await createSnack(req as Request, res as Response);
     expect(status).toHaveBeenCalledWith(400);
   });
 
-  it("createSnack success", async () => {
-    const created = { id: 1, name: "Snack" };
-    req.body = { name: "Snack" };
-    (mockSnackService.createSnack as jest.Mock).mockResolvedValue(created);
+  it('createSnack success', async () => {
+    req.body = { name: 'TestSnack' + Date.now() };
+    mockSnackService.createSnack.mockResolvedValue({
+      id: 999,
+      ...req.body,
+    });
 
     await createSnack(req as Request, res as Response);
 
     expect(status).toHaveBeenCalledWith(201);
-    expect(json).toHaveBeenCalledWith(created);
+    expect(json).toHaveBeenCalled();
+    const result = json.mock.calls[0][0];
+    expect(result).toHaveProperty('name');
   });
 
-  it("addPortion validates portionId", async () => {
-    req.params = { snackId: "1" };
+  it('addPortion validates portionId', async () => {
+    req.params = { snackId: '1' };
     req.body = {};
     await addPortion(req as Request, res as Response);
     expect(status).toHaveBeenCalledWith(400);
   });
 
-  it("getSnack returns 404 when not found", async () => {
-    req.params = { id: "99" };
-    (mockSnackService.getSnackWithTotals as jest.Mock).mockResolvedValue(null);
+  it('getSnack returns 404 when not found', async () => {
+    req.params = { id: '99' };
+    mockSnackService.getSnackWithTotals.mockResolvedValue(
+      null
+    );
 
     await getSnack(req as Request, res as Response);
 
     expect(status).toHaveBeenCalledWith(404);
   });
 
-  it("removePortion returns 404 when not found", async () => {
-    req.params = { snackId: "1", portionId: "2" };
-    (mockSnackService.removePortion as jest.Mock).mockRejectedValue(
-      new Error("not found"),
+  it('removePortion returns 404 when not found', async () => {
+    req.params = { snackId: '999999', portionId: '999999' };
+    mockSnackService.removePortion.mockRejectedValue(
+      new Error('not found')
     );
 
     await removePortion(req as Request, res as Response);

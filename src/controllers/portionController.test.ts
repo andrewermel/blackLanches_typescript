@@ -64,7 +64,7 @@ describe('portionController', () => {
 
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalled();
-    const result = json.mock.calls[0][0];
+    const result = json.mock.calls[0]?.[0];
     expect(result).toHaveProperty('weightG', 100);
   });
 
@@ -81,7 +81,9 @@ describe('portionController', () => {
 
     expect(status).not.toHaveBeenCalled();
     expect(json).toHaveBeenCalled();
-    expect(Array.isArray(json.mock.calls[0][0])).toBe(true);
+    expect(Array.isArray(json.mock.calls[0]?.[0])).toBe(
+      true
+    );
   });
 
   it('deletePortion handles in-use error', async () => {
@@ -90,6 +92,6 @@ describe('portionController', () => {
     await deletePortion(req as Request, res as Response);
 
     // Accept either 404 (not found) or 409 (in use)
-    expect([404, 409]).toContain(status.mock.calls[0][0]);
+    expect([404, 409]).toContain(status.mock.calls[0]?.[0]);
   });
 });

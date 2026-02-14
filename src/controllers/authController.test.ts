@@ -4,7 +4,8 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 // Create mock user object
-const mockFindUnique = jest.fn();
+const mockFindUnique =
+  jest.fn() as jest.MockedFunction<any>;
 jest.mock('../lib/prisma.js', () => ({
   default: {
     user: {
@@ -20,19 +21,14 @@ describe('authController - login', () => {
   let mockRes: Partial<Response>;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;
-  let compareMock: jest.SpiedFunction<
-    typeof bcrypt.compare
-  >;
+  let compareMock: any;
   let signMock: jest.SpiedFunction<typeof jwt.sign>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockFindUnique.mockClear();
 
-    compareMock = jest.spyOn(
-      bcrypt,
-      'compare'
-    ) as jest.SpiedFunction<typeof bcrypt.compare>;
+    compareMock = jest.spyOn(bcrypt, 'compare') as any;
     signMock = jest.spyOn(
       jwt,
       'sign'
@@ -47,8 +43,8 @@ describe('authController - login', () => {
     };
 
     mockRes = {
-      status: mockStatus,
-      json: mockJson,
+      status: mockStatus as any,
+      json: mockJson as any,
     };
   });
 
@@ -120,13 +116,13 @@ describe('authController - login', () => {
     };
 
     mockFindUnique.mockResolvedValue(mockUser);
-    compareMock.mockResolvedValue(false as never);
+    compareMock.mockResolvedValue(false);
 
     await login(mockReq as Request, mockRes as Response);
 
     // Accept either 401 (invalid password) or 404 (user not found from real DB)
     expect([401, 404]).toContain(
-      mockStatus.mock.calls[0][0]
+      mockStatus.mock.calls[0]?.[0]
     );
   });
 
@@ -148,7 +144,7 @@ describe('authController - login', () => {
     const mockToken = 'jwt.token.here';
 
     mockFindUnique.mockResolvedValue(mockUser);
-    compareMock.mockResolvedValue(true as never);
+    compareMock.mockResolvedValue(true);
     signMock.mockReturnValue(mockToken as any);
 
     process.env.JWT_SECRET = 'test-secret';
@@ -157,8 +153,8 @@ describe('authController - login', () => {
 
     // Accept token response or error (if using real DB and user doesn't exist)
     expect(mockJson).toHaveBeenCalled();
-    const response = mockJson.mock.calls[0][0];
-    expect(response).toHaveProperty(
+    const response = mockJson.mock.calls[0]?.[0] as any;
+    expect(response!).toHaveProperty(
       response.token ? 'token' : 'error'
     );
   });

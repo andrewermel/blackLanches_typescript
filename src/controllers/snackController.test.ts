@@ -2,12 +2,12 @@ import { jest } from '@jest/globals';
 import { Request, Response } from 'express';
 
 const mockSnackService = {
-  createSnack: jest.fn(),
-  getAllSnacks: jest.fn(),
-  getSnackWithTotals: jest.fn(),
-  addPortion: jest.fn(),
-  removePortion: jest.fn(),
-  deleteSnack: jest.fn(),
+  createSnack: jest.fn() as jest.MockedFunction<any>,
+  getAllSnacks: jest.fn() as jest.MockedFunction<any>,
+  getSnackWithTotals: jest.fn() as jest.MockedFunction<any>,
+  addPortion: jest.fn() as jest.MockedFunction<any>,
+  removePortion: jest.fn() as jest.MockedFunction<any>,
+  deleteSnack: jest.fn() as jest.MockedFunction<any>,
 };
 
 jest.mock('../services/snackService.js', () => ({
@@ -54,7 +54,7 @@ describe('snackController', () => {
 
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalled();
-    const result = json.mock.calls[0][0];
+    const result = json.mock.calls[0]?.[0];
     expect(result).toHaveProperty('name');
   });
 

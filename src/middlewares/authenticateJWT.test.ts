@@ -30,8 +30,8 @@ describe('authenticateJWT middleware', () => {
     };
 
     mockRes = {
-      status: mockStatus,
-      json: mockJson,
+      status: mockStatus as any,
+      json: mockJson as any,
     };
 
     process.env.JWT_SECRET = 'test-secret';

@@ -2,11 +2,11 @@ import { jest } from '@jest/globals';
 import { Request, Response } from 'express';
 
 const mockIngredientService = {
-  create: jest.fn(),
-  findAll: jest.fn(),
-  findById: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
+  create: jest.fn() as jest.MockedFunction<any>,
+  findAll: jest.fn() as jest.MockedFunction<any>,
+  findById: jest.fn() as jest.MockedFunction<any>,
+  update: jest.fn() as jest.MockedFunction<any>,
+  delete: jest.fn() as jest.MockedFunction<any>,
 };
 
 jest.mock('../services/ingredientService.js', () => ({
@@ -57,7 +57,7 @@ describe('ingredientController', () => {
 
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalled();
-    const result = json.mock.calls[0][0];
+    const result = json.mock.calls[0]?.[0];
     expect(result).toHaveProperty('name');
     expect(result).toHaveProperty('weightG', 1000);
   });
@@ -65,7 +65,7 @@ describe('ingredientController', () => {
   it('getIngredient returns 404 when not found', async () => {
     req.params = { id: '99' };
     (
-      mockIngredientService.findById as jest.Mock
+      mockIngredientService.findById as any
     ).mockResolvedValue(null);
 
     await getIngredient(req as Request, res as Response);
@@ -85,6 +85,8 @@ describe('ingredientController', () => {
 
     expect(status).not.toHaveBeenCalled();
     expect(json).toHaveBeenCalled();
-    expect(Array.isArray(json.mock.calls[0][0])).toBe(true);
+    expect(Array.isArray(json.mock.calls[0]?.[0])).toBe(
+      true
+    );
   });
 });

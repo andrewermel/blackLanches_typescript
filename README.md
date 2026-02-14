@@ -243,7 +243,7 @@ Se você vender por R$ 15,00, terá **R$ 8,40 de lucro** por lanche! 💰
 
 ```
 API_BLACKLANCHES/
-├── frontend/              # Aplicação React
+├── frontend/              # Aplicação React + Vite
 │   ├── src/
 │   │   ├── components/   # Componentes reutilizáveis
 │   │   ├── contexts/     # Context API (autenticação)
@@ -253,17 +253,43 @@ API_BLACKLANCHES/
 │   │   ├── utils/        # Funções utilitárias
 │   │   └── constants/    # Constantes e configurações
 │   └── public/           # Arquivos estáticos
-├── src/                  # Backend Node.js/TypeScript
-│   ├── controllers/      # Controladores das rotas
-│   ├── services/         # Lógica de negócio
-│   ├── routes/           # Definição de rotas
-│   ├── middlewares/      # Middlewares (autenticação, etc)
-│   ├── types/            # Tipos TypeScript
-│   └── helpers/          # Funções auxiliares
-├── prisma/               # Schema e migrações do banco
+├── src/                  # Backend Node.js/TypeScript (MVC)
+│   ├── controllers/      # 🎮 Orquestração de requisições
+│   │   ├── authController.ts
+│   │   ├── ingredientController.ts
+│   │   ├── portionController.ts
+│   │   ├── snackController.ts
+│   │   └── userController.ts ✨
+│   ├── services/         # 💼 Lógica de negócio
+│   │   ├── ingredientService.ts
+│   │   ├── portionService.ts
+│   │   ├── snackService.ts
+│   │   └── userService.ts ✨
+│   ├── routes/           # 🗺️ Definição de endpoints
+│   │   ├── authRoutes.ts
+│   │   ├── ingredientRoutes.ts
+│   │   ├── portionRoutes.ts
+│   │   ├── snackRoutes.ts
+│   │   └── userRoutes.ts ✨
+│   ├── middlewares/      # 🔒 Autenticação e upload
+│   │   ├── authenticateJWT.ts
+│   │   └── upload.ts
+│   ├── helpers/          # 🛠️ Funções utilitárias
+│   │   ├── errorHandler.ts
+│   │   ├── validators.ts
+│   │   └── validationPatterns.ts ✨ (centralizado!)
+│   ├── types/            # 📘 Tipos TypeScript compartilhados
+│   │   ├── entities.ts
+│   │   ├── errors.ts
+│   │   └── jwt.ts
+│   ├── lib/              # 📦 Configurações externas
+│   │   └── prisma.ts
+│   └── index.ts          # 🚀 Entrada da aplicação
+├── prisma/               # 🗄️ Schema e migrações
 │   ├── schema.prisma     # Modelo do banco de dados
 │   └── migrations/       # Histórico de migrações
-└── uploads/              # Imagens dos lanches
+├── public/uploads/       # 🖼️ Imagens dos lanches
+└── package.json          # Dependências do projeto
 ```
 
 ---
@@ -273,7 +299,7 @@ API_BLACKLANCHES/
 ### Autenticação
 
 - `POST /api/v1/auth/login` - Login (retorna JWT)
-- `POST /users` - Criar usuário
+- `POST /api/v1/users` - Criar novo usuário
 - `GET /protected` - Rota protegida (validar token)
 
 ### Ingredientes
@@ -303,6 +329,61 @@ API_BLACKLANCHES/
 
 ---
 
+## 🏗️ Arquitetura MVC
+
+O backend segue o padrão **MVC (Model-View-Controller)** com separação clara de responsabilidades:
+
+### 📊 Fluxo de uma Requisição
+
+```
+1. Cliente (Frontend/Postman)
+   ↓
+2. Route (userRoutes.ts) - Define o endpoint
+   ↓
+3. Controller (userController.ts) - Valida entrada (req.body)
+   ↓
+4. Service (userService.ts) - Executa lógica de negócio
+   ↓
+5. Model (Prisma) - Acessa/modifica banco de dados
+   ↓
+6. Response - Retorna dados ao cliente
+```
+
+### 📚 Responsabilidades de Cada Camada
+
+| Camada          | Responsabilidade                | Exemplo                                      |
+| --------------- | ------------------------------- | -------------------------------------------- |
+| **Routes**      | Mapear URLs para controladores  | `POST /api/v1/users` → `createUser()`        |
+| **Controllers** | Validar entrada, chamar service | Validar email, chamar `userService.create()` |
+| **Services**    | Lógica de negócio, BD           | Criptografar senha, criar usuário no DB      |
+| **Models**      | Definir estrutura de dados      | Schema Prisma define fields da tabela `user` |
+| **Helpers**     | Validações reutilizáveis        | `validateEmail()`, `validatePassword()`      |
+
+### ✨ Validações Centralizadas
+
+Todas as validações estão em um único arquivo [src/helpers/validationPatterns.ts](src/helpers/validationPatterns.ts):
+
+```typescript
+// Email e Senha com regex forte
+export const EMAIL_REGEX = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+export const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+// Mensagens de erro padrão
+export const VALIDATION_MESSAGES = { ... };
+
+// Funções reutilizáveis
+export const validateEmail = (email: string): boolean => { ... };
+export const validatePassword = (password: string): boolean => { ... };
+```
+
+**Benefícios:**
+
+- ✅ Uma única fonte de verdade para validações
+- ✅ Fácil de manutenção (mudar regex em um lugar)
+- ✅ Reutilizável em qualquer controller/service
+
+---
+
 ## 🧪 Executando os Testes
 
 ```bash
@@ -317,6 +398,36 @@ npm run test:watch
 ```
 
 **Cobertura atual: 25/25 testes passando ✅**
+
+---
+
+## 🚀 Comandos Úteis
+
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar servidor em desenvolvimento
+npm run dev
+
+# Executar testes
+npm test
+
+# Testes em modo watch (auto-reload)
+npm run test:watch
+
+# Testes com cobertura
+npm run test:coverage
+
+# Validar TypeScript
+npx tsc --noEmit
+
+# Validar ESLint
+npx eslint src/**/*.ts
+
+# Formatar código (se configurado)
+npm run format
+```
 
 ---
 

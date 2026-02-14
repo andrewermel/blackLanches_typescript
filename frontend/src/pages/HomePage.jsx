@@ -1,41 +1,13 @@
-import { useEffect, useState } from 'react';
-import { API_BASE_URL, API_ENDPOINTS } from '../constants';
+import { ROUTES } from '../constants';
+import { useAuth } from '../contexts/AuthContext';
 import './HomePage.css';
 
 export default function HomePage() {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.hash = '#/login';
-      return;
-    }
-
-    // Opcional: validar token com endpoint protegido
-    fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.ME}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.user) setUser(data.user);
-      })
-      .catch(() => setError('Sessão expirada'));
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.hash = '#/login';
-  };
+  const { user, logout } = useAuth();
 
   return (
     <div className="card home-container">
       <h2>BlackLanches</h2>
-
-      {error && (
-        <div className="error-message">{error}</div>
-      )}
 
       {user && (
         <div className="welcome-section">
@@ -49,7 +21,7 @@ export default function HomePage() {
         <div className="menu-card">
           <h3>🥬 Ingredientes</h3>
           <p>Gerencie os ingredientes disponíveis</p>
-          <a href="#/ingredients">
+          <a href={ROUTES.INGREDIENTS}>
             <button>Acessar</button>
           </a>
         </div>
@@ -57,7 +29,7 @@ export default function HomePage() {
         <div className="menu-card">
           <h3>🍽️ Porções</h3>
           <p>Crie porções a partir dos ingredientes</p>
-          <a href="#/portions">
+          <a href={ROUTES.PORTIONS}>
             <button>Acessar</button>
           </a>
         </div>
@@ -65,15 +37,12 @@ export default function HomePage() {
         <div className="menu-card">
           <h3>🍔 Lanches</h3>
           <p>Monte lanches com porções e calcule custos</p>
-          <a href="#/snacks">
+          <a href={ROUTES.SNACKS}>
             <button>Acessar</button>
           </a>
         </div>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
+        <button className="logout-btn" onClick={logout}>
           Sair
         </button>
       </div>

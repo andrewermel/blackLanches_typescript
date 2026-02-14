@@ -1,18 +1,7 @@
 import { jest } from '@jest/globals';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-
-// Create mock user object
-const mockFindUnique =
-  jest.fn() as jest.MockedFunction<any>;
-jest.mock('../lib/prisma.js', () => ({
-  default: {
-    user: {
-      findUnique: mockFindUnique,
-    },
-  },
-}));
+import prisma from '../lib/prisma.js';
 
 import { login } from './authController.js';
 
@@ -21,18 +10,28 @@ describe('authController - login', () => {
   let mockRes: Partial<Response>;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;
-  let compareMock: any;
-  let signMock: jest.SpiedFunction<typeof jwt.sign>;
+  let testUserId: number;
+  const testEmail =
+    'testuser_' + Date.now() + '@example.com';
+  const testPassword = 'Test@1234';
+
+  beforeAll(async () => {
+    const hashedPassword = await bcrypt.hash(
+      testPassword,
+      10
+    );
+    const user = await prisma.user.create({
+      data: {
+        name: 'Test User',
+        email: testEmail,
+        password: hashedPassword,
+      },
+    });
+    testUserId = user.id;
+    process.env.JWT_SECRET = 'test-secret';
+  });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockFindUnique.mockClear();
-
-    compareMock = jest.spyOn(bcrypt, 'compare') as any;
-    signMock = jest.spyOn(
-      jwt,
-      'sign'
-    ) as jest.SpiedFunction<typeof jwt.sign>;
     mockJson = jest.fn().mockReturnValue(undefined);
     mockStatus = jest
       .fn()
@@ -46,6 +45,15 @@ describe('authController - login', () => {
       status: mockStatus as any,
       json: mockJson as any,
     };
+  });
+
+  afterAll(async () => {
+    if (testUserId) {
+      await prisma.user.delete({
+        where: { id: testUserId },
+      });
+    }
+    await prisma.$disconnect();
   });
 
   it('should return 400 if email is missing', async () => {
@@ -86,11 +94,9 @@ describe('authController - login', () => {
 
   it('should return 404 when user not found', async () => {
     mockReq.body = {
-      email: 'nonexistent@example.com',
+      email: 'nonexistent_' + Date.now() + '@example.com',
       password: 'Test@1234',
     };
-
-    mockFindUnique.mockResolvedValue(null);
 
     await login(mockReq as Request, mockRes as Response);
 
@@ -101,61 +107,29 @@ describe('authController - login', () => {
   });
 
   it('should return 401 when password is invalid', async () => {
-    const testEmail = 'test' + Date.now() + '@example.com';
     mockReq.body = {
       email: testEmail,
       password: 'WrongPassword@123',
     };
 
-    const mockUser = {
-      id: 1,
-      name: 'Test User',
-      email: testEmail,
-      password: '$2a$12$hashedpassword',
-      createdAt: new Date(),
-    };
-
-    mockFindUnique.mockResolvedValue(mockUser);
-    compareMock.mockResolvedValue(false);
-
     await login(mockReq as Request, mockRes as Response);
 
-    // Accept either 401 (invalid password) or 404 (user not found from real DB)
-    expect([401, 404]).toContain(
-      mockStatus.mock.calls[0]?.[0]
-    );
+    expect(mockStatus).toHaveBeenCalledWith(401);
+    expect(mockJson).toHaveBeenCalledWith({
+      error: 'Invalid password.',
+    });
   });
 
   it('should return token on successful login', async () => {
-    const testEmail = 'test' + Date.now() + '@example.com';
     mockReq.body = {
       email: testEmail,
-      password: 'Test@1234',
+      password: testPassword,
     };
-
-    const mockUser = {
-      id: 1,
-      name: 'Test User',
-      email: testEmail,
-      password: '$2a$12$hashedpassword',
-      createdAt: new Date(),
-    };
-
-    const mockToken = 'jwt.token.here';
-
-    mockFindUnique.mockResolvedValue(mockUser);
-    compareMock.mockResolvedValue(true);
-    signMock.mockReturnValue(mockToken as any);
-
-    process.env.JWT_SECRET = 'test-secret';
 
     await login(mockReq as Request, mockRes as Response);
 
-    // Accept token response or error (if using real DB and user doesn't exist)
     expect(mockJson).toHaveBeenCalled();
     const response = mockJson.mock.calls[0]?.[0] as any;
-    expect(response!).toHaveProperty(
-      response.token ? 'token' : 'error'
-    );
+    expect(response).toHaveProperty('token');
   });
 });

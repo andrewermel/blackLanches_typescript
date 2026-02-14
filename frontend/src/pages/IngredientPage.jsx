@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { API_BASE_URL, API_ENDPOINTS } from '../constants';
+import { useCallback, useEffect, useState } from 'react';
+import { API_ENDPOINTS, STORAGE_KEYS } from '../constants';
+import { apiService } from '../services/apiService';
 import {
   formatCostPerGram,
   formatCurrency,
@@ -7,71 +8,80 @@ import {
 } from '../utils/formatters';
 import './IngredientPage.css';
 
-const API_URL = `${API_BASE_URL}${API_ENDPOINTS.INGREDIENTS}`;
+const INITIAL_FORM = { name: '', weightG: '', cost: '' };
 
 export default function IngredientPage() {
   const [ingredients, setIngredients] = useState([]);
-  const [form, setForm] = useState({
-    name: '',
-    weightG: '',
-    cost: '',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.hash = '#/login';
-      return;
-    }
-    fetchIngredients();
-  }, []);
-
-  async function fetchIngredients() {
+  const fetchIngredients = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
+      const data = await apiService.get(
+        API_ENDPOINTS.INGREDIENTS
+      );
       setIngredients(data);
     } catch (err) {
       setError('Erro ao buscar ingredientes');
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    if (!token) {
+      window.location.hash = '#/login';
+      return;
+    }
+    fetchIngredients();
+  }, [fetchIngredients]);
+
+  function validateForm() {
+    if (!form.name.trim()) {
+      setError('Nome do ingrediente é obrigatório');
+      return false;
+    }
+    if (!form.weightG || Number(form.weightG) <= 0) {
+      setError('Peso deve ser maior que zero');
+      return false;
+    }
+    if (!form.cost || Number(form.cost) <= 0) {
+      setError('Custo deve ser maior que zero');
+      return false;
+    }
+    return true;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
 
+    if (!validateForm()) return;
+
     const payload = {
-      name: form.name,
+      name: form.name.trim(),
       weightG: Number(form.weightG),
       cost: Number(form.cost),
     };
 
     try {
-      const url = editingId
-        ? `${API_URL}/${editingId}`
-        : API_URL;
-      const method = editingId ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(
-          data.error || 'Erro ao salvar ingrediente'
+      if (editingId) {
+        await apiService.put(
+          `${API_ENDPOINTS.INGREDIENTS}/${editingId}`,
+          payload
+        );
+      } else {
+        await apiService.post(
+          API_ENDPOINTS.INGREDIENTS,
+          payload
         );
       }
 
-      setForm({ name: '', weightG: '', cost: '' });
+      setForm(INITIAL_FORM);
       setEditingId(null);
       fetchIngredients();
     } catch (err) {
@@ -84,13 +94,9 @@ export default function IngredientPage() {
       return;
 
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Erro ao deletar');
-      }
+      await apiService.delete(
+        `${API_ENDPOINTS.INGREDIENTS}/${id}`
+      );
       fetchIngredients();
     } catch (err) {
       setError(err.message);
@@ -109,7 +115,7 @@ export default function IngredientPage() {
 
   function handleCancel() {
     setEditingId(null);
-    setForm({ name: '', weightG: '', cost: '' });
+    setForm(INITIAL_FORM);
   }
 
   function handleChange(e) {

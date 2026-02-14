@@ -4,7 +4,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { API_BASE_URL, API_ENDPOINTS } from '../constants';
+import { API_ENDPOINTS, STORAGE_KEYS } from '../constants';
 import { apiService } from '../services/apiService';
 
 const AuthContext = createContext(null);
@@ -20,32 +20,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
     if (!token) {
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.AUTH.ME}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const data = await apiService.get(
+        API_ENDPOINTS.AUTH.ME
       );
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        setIsAuthenticated(true);
-      } else {
-        logout();
-      }
+      setUser(data.user);
+      setIsAuthenticated(true);
     } catch (error) {
-      console.error(
-        'Erro ao verificar autenticação:',
-        error
-      );
       logout();
     } finally {
       setLoading(false);
@@ -60,27 +47,16 @@ export const AuthProvider = ({ children }) => {
         password,
       }
     );
-    localStorage.setItem('token', data.token);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
 
     // Buscar dados do usuário após login
     try {
-      const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.AUTH.ME}`,
-        {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-          },
-        }
+      const userData = await apiService.get(
+        API_ENDPOINTS.AUTH.ME
       );
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData.user);
-      }
+      setUser(userData.user);
     } catch (error) {
-      console.error(
-        'Erro ao buscar dados do usuário:',
-        error
-      );
+      // Token salvo, usuário autenticado mesmo sem dados extras
     }
 
     setIsAuthenticated(true);
@@ -88,21 +64,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const userData = await apiService.post(
-      API_ENDPOINTS.AUTH.REGISTER,
-      {
-        name,
-        email,
-        password,
-      }
-    );
+    await apiService.post(API_ENDPOINTS.AUTH.REGISTER, {
+      name,
+      email,
+      password,
+    });
 
     // Após criar usuário, fazer login
     return await login(email, password);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
     setUser(null);
     setIsAuthenticated(false);
     window.location.hash = '#/login';

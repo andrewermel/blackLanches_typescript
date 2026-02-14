@@ -5,13 +5,13 @@ import { ImageUpload } from '../components/ImageUpload';
 import { Input } from '../components/Input';
 import { Loading } from '../components/Loading';
 import {
-  API_BASE_URL,
   API_ENDPOINTS,
   IMAGE_CONFIG,
   ROUTES,
 } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useResource } from '../hooks/useApi';
+import { apiService } from '../services/apiService';
 import {
   formatCurrency,
   formatWeight,
@@ -48,27 +48,7 @@ export default function SnackPage() {
       window.location.hash = ROUTES.LOGIN;
       return;
     }
-    fetchAll().then(data => {
-      console.log('📊 Lanches carregados:', data);
-      if (data && data.length > 0) {
-        console.log('🔍 Primeiro lanche:', data[0]);
-        console.log(
-          '💰 totalCost:',
-          data[0].totalCost,
-          typeof data[0].totalCost
-        );
-        console.log(
-          '⚖️ totalWeightG:',
-          data[0].totalWeightG,
-          typeof data[0].totalWeightG
-        );
-        console.log(
-          '💵 suggestedPrice:',
-          data[0].suggestedPrice,
-          typeof data[0].suggestedPrice
-        );
-      }
-    });
+    fetchAll();
     fetchPortions();
   }, [isAuthenticated]);
 
@@ -97,12 +77,17 @@ export default function SnackPage() {
   const handleCreateSnack = async e => {
     e.preventDefault();
     setActionError('');
+
+    if (!snackName.trim()) {
+      setActionError('Nome do lanche é obrigatório');
+      return;
+    }
+
     setActionLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
-      formData.append('name', snackName);
+      formData.append('name', snackName.trim());
 
       if (snackImage) {
         if (typeof snackImage === 'string') {
@@ -112,110 +97,27 @@ export default function SnackPage() {
         }
       }
 
-      // Criar o lanche manualmente (sem usar o hook create)
-      const fullUrl = `${API_BASE_URL}${API_ENDPOINTS.SNACKS}`;
-      console.log('📤 Enviando requisição para:', fullUrl);
-      console.log(
-        '🔑 Token:',
-        token ? 'Presente' : 'Ausente'
+      const newSnack = await apiService.post(
+        API_ENDPOINTS.SNACKS,
+        formData
       );
-
-      const createResponse = await fetch(fullUrl, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      console.log('📥 Resposta recebida:', {
-        status: createResponse.status,
-        ok: createResponse.ok,
-        statusText: createResponse.statusText,
-        contentType:
-          createResponse.headers.get('content-type'),
-      });
-
-      if (!createResponse.ok) {
-        const text = await createResponse.text();
-        console.error('❌ Erro na resposta:', {
-          status: createResponse.status,
-          statusText: createResponse.statusText,
-          text: text.substring(0, 200),
-        });
-
-        try {
-          const errorData = JSON.parse(text);
-          throw new Error(
-            errorData.error || 'Erro ao criar lanche'
-          );
-        } catch (parseError) {
-          throw new Error(
-            `Erro ao criar lanche (${createResponse.status}): ${createResponse.statusText}`
-          );
-        }
-      }
-
-      const newSnack = await createResponse.json();
 
       // Adicionar porções ao lanche criado
       if (portionsToAdd.length > 0 && newSnack?.id) {
         for (const portion of portionsToAdd) {
-          const response = await fetch(
-            `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${newSnack.id}/portions/${portion.id}`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                portionId: portion.id,
-              }),
-            }
+          await apiService.post(
+            `${API_ENDPOINTS.SNACKS}/${newSnack.id}/portions/${portion.id}`,
+            { portionId: portion.id }
           );
-
-          if (!response.ok) {
-            const text = await response.text();
-            console.error('❌ Erro ao adicionar porção:', {
-              status: response.status,
-              statusText: response.statusText,
-              text: text.substring(0, 200),
-            });
-
-            try {
-              const errorData = JSON.parse(text);
-              throw new Error(
-                errorData.error ||
-                  'Erro ao adicionar porção ao lanche'
-              );
-            } catch (parseError) {
-              throw new Error(
-                `Erro ao adicionar porção (${response.status}): ${response.statusText}`
-              );
-            }
-          }
         }
       }
 
       setSnackName('');
       setSnackImage(null);
       setPortionsToAdd([]);
-
-      // Recarregar todos os lanches para pegar os valores atualizados
       await fetchAll();
-
-      console.log(
-        '✅ Lanche criado com sucesso:',
-        newSnack
-      );
-      console.log(
-        '✅ Lanches recarregados:',
-        await fetchAll()
-      );
     } catch (err) {
       setActionError(err.message);
-      console.error('❌ Erro ao criar lanche:', err);
     } finally {
       setActionLoading(false);
     }
@@ -248,31 +150,10 @@ export default function SnackPage() {
     setActionLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-
-      // Atualizar nome e imagem do lanche
-      const formData = new FormData();
-      formData.append('name', snackName);
-
-      if (snackImage) {
-        if (typeof snackImage === 'string') {
-          formData.append('imageUrl', snackImage);
-        } else {
-          formData.append('image', snackImage);
-        }
-      }
-
       // Buscar porções atuais do lanche
-      const currentSnackResponse = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${editingSnackId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const currentSnack = await apiService.get(
+        `${API_ENDPOINTS.SNACKS}/${editingSnackId}`
       );
-      const currentSnack =
-        await currentSnackResponse.json();
       const currentPortions = currentSnack.portions || [];
 
       // Remover porções que não estão mais na lista
@@ -282,14 +163,8 @@ export default function SnackPage() {
             p => p.id === currentPortion.id
           )
         ) {
-          await fetch(
-            `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${editingSnackId}/portions/${currentPortion.id}`,
-            {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          await apiService.delete(
+            `${API_ENDPOINTS.SNACKS}/${editingSnackId}/portions/${currentPortion.id}`
           );
         }
       }
@@ -299,29 +174,17 @@ export default function SnackPage() {
         if (
           !currentPortions.find(p => p.id === portion.id)
         ) {
-          await fetch(
-            `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${editingSnackId}/portions/${portion.id}`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                portionId: portion.id,
-              }),
-            }
+          await apiService.post(
+            `${API_ENDPOINTS.SNACKS}/${editingSnackId}/portions/${portion.id}`,
+            { portionId: portion.id }
           );
         }
       }
 
       handleCancelEdit();
       await fetchAll();
-
-      console.log('✅ Lanche atualizado com sucesso');
     } catch (err) {
       setActionError(err.message);
-      console.error('❌ Erro ao atualizar lanche:', err);
     } finally {
       setActionLoading(false);
     }
@@ -340,16 +203,9 @@ export default function SnackPage() {
 
   const handleViewDetails = async snackId => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${snackId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const data = await apiService.get(
+        `${API_ENDPOINTS.SNACKS}/${snackId}`
       );
-      const data = await response.json();
       setSelectedSnack(data);
       setActionError('');
     } catch (err) {
@@ -363,27 +219,10 @@ export default function SnackPage() {
 
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${selectedSnack.id}/portions/${selectedPortionId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            portionId: Number(selectedPortionId),
-          }),
-        }
+      await apiService.post(
+        `${API_ENDPOINTS.SNACKS}/${selectedSnack.id}/portions/${selectedPortionId}`,
+        { portionId: Number(selectedPortionId) }
       );
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(
-          data.error || 'Erro ao adicionar porção'
-        );
-      }
 
       setSelectedPortionId('');
       handleViewDetails(selectedSnack.id);
@@ -404,23 +243,9 @@ export default function SnackPage() {
 
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.SNACKS}/${selectedSnack.id}/portions/${portionId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      await apiService.delete(
+        `${API_ENDPOINTS.SNACKS}/${selectedSnack.id}/portions/${portionId}`
       );
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(
-          data.error || 'Erro ao remover porção'
-        );
-      }
 
       handleViewDetails(selectedSnack.id);
       fetchAll();
@@ -651,83 +476,70 @@ export default function SnackPage() {
               </div>
             ) : (
               <div className="snack-cards">
-                {snacks.map(snack => {
-                  console.log(
-                    `🍔 Renderizando lanche ${snack.name}:`,
-                    {
-                      totalCost: snack.totalCost,
-                      suggestedPrice: snack.suggestedPrice,
-                      totalWeightG: snack.totalWeightG,
-                      portions: snack.portions,
-                    }
-                  );
-                  return (
-                    <Card
-                      key={snack.id}
-                      hoverable
-                      className={`snack-card ${
-                        selectedSnack?.id === snack.id
-                          ? 'selected'
-                          : ''
-                      }`}
-                    >
-                      <div className="snack-card-header">
-                        <div className="snack-card-info">
-                          <div className="snack-card-title">
-                            {snack.name}
-                          </div>
-                          <div className="snack-card-meta">
-                            Custo: R${' '}
-                            {formatCurrency(
-                              snack.totalCost
-                            )}{' '}
-                            | Preço sugerido: R${' '}
-                            {formatCurrency(
-                              snack.suggestedPrice
-                            )}
-                          </div>
-                          <div className="snack-card-meta">
-                            {snack.portions?.length || 0}{' '}
-                            porções (
-                            {formatWeight(
-                              snack.totalWeightG || 0
-                            )}
-                            )
-                          </div>
+                {snacks.map(snack => (
+                  <Card
+                    key={snack.id}
+                    hoverable
+                    className={`snack-card ${
+                      selectedSnack?.id === snack.id
+                        ? 'selected'
+                        : ''
+                    }`}
+                  >
+                    <div className="snack-card-header">
+                      <div className="snack-card-info">
+                        <div className="snack-card-title">
+                          {snack.name}
                         </div>
-                        <div className="snack-card-actions">
-                          <Button
-                            onClick={() =>
-                              handleViewDetails(snack.id)
-                            }
-                            variant="secondary"
-                            title="Ver detalhes e adicionar porções"
-                          >
-                            📋
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              handleEditSnack(snack)
-                            }
-                            variant="primary"
-                            title="Editar lanche"
-                          >
-                            ✏️
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              handleDeleteSnack(snack.id)
-                            }
-                            variant="danger"
-                            title="Deletar lanche"
-                          >
-                            🗑️
-                          </Button>
+                        <div className="snack-card-meta">
+                          Custo: R${' '}
+                          {formatCurrency(snack.totalCost)}{' '}
+                          | Preço sugerido: R${' '}
+                          {formatCurrency(
+                            snack.suggestedPrice
+                          )}
+                        </div>
+                        <div className="snack-card-meta">
+                          {snack.portions?.length || 0}{' '}
+                          porções (
+                          {formatWeight(
+                            snack.totalWeightG || 0
+                          )}
+                          )
                         </div>
                       </div>
-                    </Card>
-                  );
-                })}
+                      <div className="snack-card-actions">
+                        <Button
+                          onClick={() =>
+                            handleViewDetails(snack.id)
+                          }
+                          variant="secondary"
+                          title="Ver detalhes e adicionar porções"
+                        >
+                          📋
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            handleEditSnack(snack)
+                          }
+                          variant="primary"
+                          title="Editar lanche"
+                        >
+                          ✏️
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            handleDeleteSnack(snack.id)
+                          }
+                          variant="danger"
+                          title="Deletar lanche"
+                        >
+                          🗑️
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
               </div>
             )}
           </div>

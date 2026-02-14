@@ -12,7 +12,7 @@ export const API_BASE_URL = 'http://localhost:3000';
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/api/v1/auth/login',
-    REGISTER: '/users',
+    REGISTER: '/api/v1/users',
     ME: '/protected',
   },
   INGREDIENTS: '/api/v1/ingredients',

@@ -1,87 +1,103 @@
-import { useEffect, useState } from 'react';
-import { API_BASE_URL, API_ENDPOINTS } from '../constants';
+import { useCallback, useEffect, useState } from 'react';
+import { API_ENDPOINTS, STORAGE_KEYS } from '../constants';
+import { apiService } from '../services/apiService';
 import {
   formatCurrency,
   formatWeight,
 } from '../utils/formatters';
 import './PortionPage.css';
 
-const API_URL = `${API_BASE_URL}${API_ENDPOINTS.PORTIONS}`;
-const INGREDIENTS_URL = `${API_BASE_URL}${API_ENDPOINTS.INGREDIENTS}`;
+const INITIAL_FORM = {
+  ingredientId: '',
+  name: '',
+  weightG: '',
+};
 
 export default function PortionPage() {
   const [portions, setPortions] = useState([]);
   const [ingredients, setIngredients] = useState([]);
-  const [form, setForm] = useState({
-    ingredientId: '',
-    name: '',
-    weightG: '',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.hash = '#/login';
-      return;
-    }
-    fetchPortions();
-    fetchIngredients();
-  }, []);
-
-  async function fetchPortions() {
+  const fetchPortions = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
+      const data = await apiService.get(
+        API_ENDPOINTS.PORTIONS
+      );
       setPortions(data);
     } catch (err) {
       setError('Erro ao buscar porções');
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function fetchIngredients() {
+  const fetchIngredients = useCallback(async () => {
     try {
-      const res = await fetch(INGREDIENTS_URL);
-      const data = await res.json();
+      const data = await apiService.get(
+        API_ENDPOINTS.INGREDIENTS
+      );
       setIngredients(data);
     } catch (err) {
       setError('Erro ao buscar ingredientes');
     }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    if (!token) {
+      window.location.hash = '#/login';
+      return;
+    }
+    fetchPortions();
+    fetchIngredients();
+  }, [fetchPortions, fetchIngredients]);
+
+  function validateForm() {
+    if (!form.ingredientId) {
+      setError('Selecione um ingrediente');
+      return false;
+    }
+    if (!form.name.trim()) {
+      setError('Nome da porção é obrigatório');
+      return false;
+    }
+    if (!form.weightG || Number(form.weightG) <= 0) {
+      setError('Peso deve ser maior que zero');
+      return false;
+    }
+    return true;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
 
-    const url = editingId
-      ? `${API_URL}/${editingId}`
-      : API_URL;
-    const method = editingId ? 'PUT' : 'POST';
+    if (!validateForm()) return;
+
+    const payload = {
+      ingredientId: Number(form.ingredientId),
+      name: form.name.trim(),
+      weightG: Number(form.weightG),
+    };
 
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ingredientId: Number(form.ingredientId),
-          name: form.name,
-          weightG: Number(form.weightG),
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(
-          data.error || 'Erro ao salvar porção'
+      if (editingId) {
+        await apiService.put(
+          `${API_ENDPOINTS.PORTIONS}/${editingId}`,
+          payload
+        );
+      } else {
+        await apiService.post(
+          API_ENDPOINTS.PORTIONS,
+          payload
         );
       }
 
-      setForm({ ingredientId: '', name: '', weightG: '' });
+      setForm(INITIAL_FORM);
       setEditingId(null);
       fetchPortions();
     } catch (err) {
@@ -93,13 +109,9 @@ export default function PortionPage() {
     if (!confirm('Deseja deletar esta porção?')) return;
 
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Erro ao deletar');
-      }
+      await apiService.delete(
+        `${API_ENDPOINTS.PORTIONS}/${id}`
+      );
       fetchPortions();
     } catch (err) {
       setError(err.message);
@@ -117,7 +129,7 @@ export default function PortionPage() {
 
   function handleCancel() {
     setEditingId(null);
-    setForm({ ingredientId: '', name: '', weightG: '' });
+    setForm(INITIAL_FORM);
   }
 
   function handleChange(e) {

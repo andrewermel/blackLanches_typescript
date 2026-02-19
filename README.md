@@ -79,7 +79,41 @@ Antes de começar, você precisa ter instalado em sua máquina:
 
 ---
 
-## 🚀 Como Instalar e Executar
+## � Como Iniciar com Docker (Recomendado!)
+
+**Não quer instalar Node.js e PostgreSQL?** Use Docker! ⚡
+
+### Pré-requisitos Docker:
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) instalado
+
+### Em 3 passos:
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/seu-usuario/API_BLACKLANCHES.git
+cd API_BLACKLANCHES
+
+# 2. Construa as imagens (primeira vez)
+docker compose build
+
+# 3. Inicie tudo
+docker compose up
+```
+
+**Pronto!** Tudo rodando:
+
+- 🎨 Frontend: http://localhost:5173
+- 🔙 Backend: http://localhost:3000
+- 🐘 PostgreSQL: localhost:5432
+
+✅ **Para próximas vezes, apenas execute:** `docker compose up`
+
+> ⚠️ **Atenção:** A senha deve ter mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial. Ex: `Senha123!`
+
+---
+
+## 🚀 Como Instalar e Executar (Sem Docker)
 
 ### 1️⃣ Clone o Repositório
 

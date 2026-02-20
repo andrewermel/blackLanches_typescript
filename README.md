@@ -111,6 +111,21 @@ docker compose up
 
 > ⚠️ **Atenção:** A senha deve ter mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial. Ex: `Senha123!`
 
+### 📚 Acessar Documentação da API (Swagger)
+
+Após iniciar com `docker compose up`, acesse a documentação interativa:
+
+```
+http://localhost:3000/api-docs
+```
+
+Lá você pode:
+
+- ✅ Ver todos os endpoints disponíveis
+- ✅ Testar requisições diretamente no navegador
+- ✅ Ver exemplos de respostas
+- ✅ Entender o schema de cada request/response
+
 ---
 
 ## 🚀 Como Instalar e Executar (Sem Docker)

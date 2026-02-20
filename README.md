@@ -113,18 +113,29 @@ docker compose up
 
 ### 📚 Acessar Documentação da API (Swagger)
 
-Após iniciar com `docker compose up`, acesse a documentação interativa:
+Após iniciar com `docker compose up`, acesse a documentação interativa **no backend (porta 3000)**:
 
 ```
-http://localhost:3000/api-docs
+🔗 http://localhost:3000/api-docs
 ```
 
-Lá você pode:
+**Lá você pode:**
 
 - ✅ Ver todos os endpoints disponíveis
-- ✅ Testar requisições diretamente no navegador
+- ✅ Testar requisições diretamente no navegador (botão "Try it out")
 - ✅ Ver exemplos de respostas
 - ✅ Entender o schema de cada request/response
+- ✅ Copiar tokens JWT e reutilizar em outros endpoints
+- ✅ Upload de imagens e testes complexos
+
+**URLs do Sistema:**
+
+| Serviço             | Porta    | URL                                |
+| ------------------- | -------- | ---------------------------------- |
+| 🎨 Frontend         | 5173     | http://localhost:5173              |
+| 📚 **Swagger Docs** | **3000** | **http://localhost:3000/api-docs** |
+| 🔙 Backend API      | 3000     | http://localhost:3000/api/v1       |
+| 🐘 PostgreSQL       | 5432     | localhost:5432                     |
 
 ---
 
@@ -195,9 +206,19 @@ npm run dev:all
 
 ## 📱 Como Usar o BlackLanches
 
-### 1. Primeiro Acesso
+### 🧪 Opção 1: Testar via Swagger (Recomendado para Testes)
 
-1. Acesse http://localhost:5173 no seu navegador
+1. Acesse **http://localhost:3000/api-docs** no seu navegador
+2. Vá para **"Users" → "POST /api/v1/users" → "Try it out"**
+3. Preencha e teste criar usuário
+4. Vá para **"Auth" → "POST /api/v1/auth/login" → "Try it out"** para fazer login
+5. Copie o token recebido
+6. Clique no botão 🔒 **"Authorize"** e cole o token
+7. Agora pode testar todos endpoints com autenticação!
+
+### 🎨 Opção 2: Usar Interface Gráfica (Frontend)
+
+1. Acesse **http://localhost:5173** no seu navegador
 2. Clique em **"Criar conta"**
 3. Preencha seu nome, email e senha
 4. Faça login com suas credenciais
@@ -327,6 +348,14 @@ API_BLACKLANCHES/
 │   │   ├── errorHandler.ts
 │   │   ├── validators.ts
 │   │   └── validationPatterns.ts ✨ (centralizado!)
+│   ├── config/           # ⚙️ Configurações da aplicação
+│   │   └── swagger.ts    # 📚 Configuração Swagger/OpenAPI
+│   ├── docs/             # 📚 Documentação Swagger/OpenAPI
+│   │   ├── auth.swagger.ts
+│   │   ├── ingredients.swagger.ts
+│   │   ├── portions.swagger.ts
+│   │   ├── snacks.swagger.ts
+│   │   └── users.swagger.ts
 │   ├── types/            # 📘 Tipos TypeScript compartilhados
 │   │   ├── entities.ts
 │   │   ├── errors.ts
@@ -344,6 +373,13 @@ API_BLACKLANCHES/
 ---
 
 ## 🔌 Endpoints da API
+
+> 📚 **Para explorar todos os endpoints de forma interativa, acesse:**
+>
+> - **Em Docker**: `http://localhost:3000/api-docs` (após `docker compose up`)
+> - **Em local**: `http://localhost:3000/api-docs` (após `npm run dev`)
+>
+> A documentação Swagger/OpenAPI permite testar todos os endpoints diretamente no navegador! ✨
 
 ### Autenticação
 
@@ -431,6 +467,28 @@ export const validatePassword = (password: string): boolean => { ... };
 - ✅ Fácil de manutenção (mudar regex em um lugar)
 - ✅ Reutilizável em qualquer controller/service
 
+### 📚 Documentação Swagger/OpenAPI
+
+A documentação da API é organizada em arquivos separados dentro de [src/docs/](src/docs/):
+
+```
+src/docs/
+├── auth.swagger.ts       # 🔐 Endpoints de autenticação
+├── ingredients.swagger.ts # 🥘 Endpoints de ingredientes
+├── portions.swagger.ts    # 🍽️ Endpoints de porções
+├── snacks.swagger.ts      # 🍔 Endpoints de lanches
+└── users.swagger.ts       # 👤 Endpoints de usuários
+```
+
+**Como funciona:**
+
+1. **Documentação Separada**: Cada módulo tem seu próprio arquivo de documentação (`.swagger.ts`)
+2. **Rotas Limpas**: Os arquivos de rotas (`src/routes/`) não contêm comentários de documentação
+3. **Merge Automático**: [src/config/swagger.ts](src/config/swagger.ts) combina todas as documentações em uma especificação OpenAPI 3.0
+4. **UI Interativa**: A interface Swagger UI permite testar todos os endpoints diretamente
+
+**Resultado:** Código limpo + Documentação centralizada + API bem documentada! 🎯
+
 ---
 
 ## 🧪 Executando os Testes
@@ -501,6 +559,15 @@ npm run format
 ### Problema: "Valores zerados nos lanches"
 
 **Solução**: Certifique-se de que as porções foram adicionadas antes de salvar o lanche. Recarregue a página para ver os valores atualizados.
+
+### Problema: "Cannot GET /api-docs"
+
+**Solução**: Certifique-se de que:
+
+1. O backend está rodando (`docker compose up` ou `npm run dev`)
+2. Você está acessando a URL correta: `http://localhost:3000/api-docs` (não 5173)
+3. A pasta `src/docs/` e arquivo `src/config/swagger.ts` existem e estão bem importados em `src/index.ts`
+4. Se estiver em Docker, execute `docker compose build backend` para reconstruir a imagem
 
 ---
 

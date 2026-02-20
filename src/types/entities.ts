@@ -24,9 +24,13 @@ export interface SnackPortion {
   id: number;
   snackId: number;
   portionId: number;
+  quantity: number;
   portion?: Portion;
   createdAt: Date;
-  updatedAt: Date;
+}
+
+export interface PortionWithQuantity extends Portion {
+  quantity: number;
 }
 
 export interface Snack {
@@ -48,7 +52,7 @@ export interface User {
 
 // Helper type retornado pela API com totais calculados
 export interface SnackWithTotals extends Snack {
-  portions: Portion[];
+  portions: PortionWithQuantity[];
   totalCost: string;
   totalWeightG: number;
   suggestedPrice: string;

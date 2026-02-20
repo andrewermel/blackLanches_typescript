@@ -58,18 +58,15 @@ export default function SnackPage() {
     const portion = portions.find(
       p => p.id === Number(selectedPortionId)
     );
-    if (
-      portion &&
-      !portionsToAdd.find(p => p.id === portion.id)
-    ) {
+    if (portion) {
       setPortionsToAdd([...portionsToAdd, portion]);
       setSelectedPortionId('');
     }
   };
 
-  const handleRemovePortionFromList = portionId => {
+  const handleRemovePortionFromList = index => {
     setPortionsToAdd(
-      portionsToAdd.filter(p => p.id !== portionId)
+      portionsToAdd.filter((_, i) => i !== index)
     );
   };
 
@@ -352,9 +349,9 @@ export default function SnackPage() {
                 <div className="portions-preview">
                   <h5>Porções selecionadas:</h5>
                   <ul className="portions-list">
-                    {portionsToAdd.map(portion => (
+                    {portionsToAdd.map((portion, index) => (
                       <li
-                        key={portion.id}
+                        key={`${portion.id}-${index}`}
                         className="portion-item"
                       >
                         <span className="portion-info">
@@ -367,7 +364,7 @@ export default function SnackPage() {
                           type="button"
                           onClick={() =>
                             handleRemovePortionFromList(
-                              portion.id
+                              index
                             )
                           }
                           className="btn-remove-portion"
@@ -382,21 +379,21 @@ export default function SnackPage() {
                     {portionsToAdd.length} porções • Peso:{' '}
                     {formatWeight(
                       portionsToAdd.reduce(
-                        (sum, p) => sum + p.weightG,
+                        (sum, p) => sum + Number(p.weightG),
                         0
                       )
                     )}{' '}
                     • Custo: R${' '}
                     {formatCurrency(
                       portionsToAdd.reduce(
-                        (sum, p) => sum + p.cost,
+                        (sum, p) => sum + Number(p.cost),
                         0
                       )
                     )}{' '}
                     • Preço Sugerido: R${' '}
                     {formatCurrency(
                       portionsToAdd.reduce(
-                        (sum, p) => sum + p.cost,
+                        (sum, p) => sum + Number(p.cost),
                         0
                       ) * 2
                     )}
@@ -582,9 +579,23 @@ export default function SnackPage() {
                       className="portion-item"
                     >
                       <span className="portion-info">
+                        {portion.quantity > 1 && (
+                          <strong>
+                            x{portion.quantity}{' '}
+                          </strong>
+                        )}
                         {portion.name} (
-                        {formatWeight(portion.weightG)} - R${' '}
-                        {formatCurrency(portion.cost, 4)})
+                        {formatWeight(
+                          portion.weightG *
+                            (portion.quantity || 1)
+                        )}{' '}
+                        - R${' '}
+                        {formatCurrency(
+                          Number(portion.cost) *
+                            (portion.quantity || 1),
+                          4
+                        )}
+                        )
                       </span>
                       <Button
                         onClick={() =>

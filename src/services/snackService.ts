@@ -13,17 +13,25 @@ interface TotalsResult {
 }
 
 const calculateTotals = (
-  portions: Portion[]
+  snackPortions: Array<{
+    portion: Portion;
+    quantity: number;
+  }>
 ): TotalsResult => {
-  const totalCostDecimal = portions.reduce(
-    (sum: Decimal, p: Portion) =>
-      sum.plus(new Decimal(String(p.cost))),
+  const totalCostDecimal = snackPortions.reduce(
+    (sum: Decimal, sp) =>
+      sum.plus(
+        new Decimal(String(sp.portion.cost)).mul(
+          sp.quantity
+        )
+      ),
     new Decimal(0)
   );
   return {
     totalCost: totalCostDecimal.toFixed(4),
-    totalWeightG: portions.reduce(
-      (s: number, p: Portion) => s + p.weightG,
+    totalWeightG: snackPortions.reduce(
+      (s: number, sp) =>
+        s + sp.portion.weightG * sp.quantity,
       0
     ),
     suggestedPrice: totalCostDecimal
@@ -57,11 +65,18 @@ export class SnackService {
 
     if (!snack) return null;
 
-    const portions = snack.snackPortions.map(
-      sp => sp.portion
-    );
     const { totalCost, totalWeightG, suggestedPrice } =
-      calculateTotals(portions as Portion[]);
+      calculateTotals(
+        snack.snackPortions.map(sp => ({
+          portion: sp.portion as Portion,
+          quantity: sp.quantity,
+        }))
+      );
+
+    const portions = snack.snackPortions.map(sp => ({
+      ...(sp.portion as Portion),
+      quantity: sp.quantity,
+    }));
 
     return {
       id: snack.id,
@@ -84,11 +99,18 @@ export class SnackService {
     });
 
     return snacks.map(snack => {
-      const portions = snack.snackPortions.map(
-        sp => sp.portion
-      ) as Portion[];
       const { totalCost, totalWeightG, suggestedPrice } =
-        calculateTotals(portions);
+        calculateTotals(
+          snack.snackPortions.map(sp => ({
+            portion: sp.portion as Portion,
+            quantity: sp.quantity,
+          }))
+        );
+
+      const portions = snack.snackPortions.map(sp => ({
+        ...(sp.portion as Portion),
+        quantity: sp.quantity,
+      }));
 
       return {
         id: snack.id,
@@ -114,8 +136,23 @@ export class SnackService {
           where: { id: portionId },
         });
 
+        const existing = await tx.snackPortion.findUnique({
+          where: {
+            snackId_portionId: { snackId, portionId },
+          },
+        });
+
+        if (existing) {
+          return tx.snackPortion.update({
+            where: {
+              snackId_portionId: { snackId, portionId },
+            },
+            data: { quantity: existing.quantity + 1 },
+          }) as any;
+        }
+
         return tx.snackPortion.create({
-          data: { snackId, portionId },
+          data: { snackId, portionId, quantity: 1 },
         }) as any;
       }
     );
@@ -128,17 +165,30 @@ export class SnackService {
     return prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
         const snackPortion =
-          await tx.snackPortion.findFirst({
-            where: { snackId, portionId },
+          await tx.snackPortion.findUnique({
+            where: {
+              snackId_portionId: { snackId, portionId },
+            },
           });
 
         if (!snackPortion) {
           throw new Error('Portion not found in snack.');
         }
 
-        await tx.snackPortion.delete({
-          where: { id: snackPortion.id },
-        });
+        if (snackPortion.quantity > 1) {
+          await tx.snackPortion.update({
+            where: {
+              snackId_portionId: { snackId, portionId },
+            },
+            data: { quantity: snackPortion.quantity - 1 },
+          });
+        } else {
+          await tx.snackPortion.delete({
+            where: {
+              snackId_portionId: { snackId, portionId },
+            },
+          });
+        }
 
         return { message: 'Portion removed.' };
       }

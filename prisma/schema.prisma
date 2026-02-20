@@ -27,7 +27,7 @@ model Ingredient {
 
 model Snack {
   id            Int           @id @default(autoincrement())
-  name          String        @unique
+  name          String
   imageUrl      String?
   snackPortions SnackPortion[]
   createdAt     DateTime      @default(now())
@@ -54,9 +54,10 @@ model SnackPortion {
   snackId   Int
   portion   Portion  @relation(fields: [portionId], references: [id], onDelete: Cascade)
   portionId Int
+  quantity  Int      @default(1)
   createdAt DateTime @default(now())
 
+  @@unique([snackId, portionId])
   @@index([snackId])
   @@index([portionId])
-  @@unique([snackId, portionId])
 }

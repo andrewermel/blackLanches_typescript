@@ -12,6 +12,7 @@ services:
     volumes:
       # 💾 Persiste dados do banco
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
       test:
         [
@@ -58,6 +59,10 @@ services:
       - backend
     environment:
       VITE_API_URL: http://backend:3000/api/v1
+    volumes:
+      # 📁 Hot reload: mapeia pasta src para mudanças em tempo real
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
     networks:
       - blacklanches-network
 

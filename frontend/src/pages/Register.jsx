@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '../components/Button';
-import { Card, CardBody } from '../components/Card';
 import { Input } from '../components/Input';
 import { ROUTES } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
@@ -51,87 +50,85 @@ export default function Register() {
 
   return (
     <div className="register-container">
-      <Card className="register-card">
-        <CardBody>
-          <h2 className="register-title">Cadastro</h2>
+      <div className="card register-card">
+        <h2 className="register-title">Cadastro</h2>
 
-          {success && (
-            <div className="message message-success">
-              Cadastro realizado com sucesso!
-              Redirecionando...
+        {success && (
+          <div className="message message-success">
+            Cadastro realizado com sucesso!
+            Redirecionando...
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="register-form"
+        >
+          <Input
+            type="text"
+            label="Nome"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            placeholder="Seu nome completo"
+          />
+
+          <Input
+            type="email"
+            label="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            placeholder="seu@email.com"
+          />
+
+          <Input
+            type="password"
+            label="Senha"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            placeholder="********"
+          />
+
+          <Input
+            type="password"
+            label="Confirmar Senha"
+            value={confirmPassword}
+            onChange={e =>
+              setConfirmPassword(e.target.value)
+            }
+            required
+            placeholder="********"
+            error={
+              confirmPassword &&
+              password !== confirmPassword
+                ? 'As senhas não coincidem'
+                : ''
+            }
+          />
+
+          {error && (
+            <div className="message message-error">
+              {error}
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            className="register-form"
+          <Button
+            type="submit"
+            fullWidth
+            loading={loading}
+            disabled={loading}
           >
-            <Input
-              type="text"
-              label="Nome"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-              placeholder="Seu nome completo"
-            />
+            {loading ? 'Cadastrando...' : 'Cadastrar'}
+          </Button>
+        </form>
 
-            <Input
-              type="email"
-              label="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="seu@email.com"
-            />
-
-            <Input
-              type="password"
-              label="Senha"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="********"
-            />
-
-            <Input
-              type="password"
-              label="Confirmar Senha"
-              value={confirmPassword}
-              onChange={e =>
-                setConfirmPassword(e.target.value)
-              }
-              required
-              placeholder="********"
-              error={
-                confirmPassword &&
-                password !== confirmPassword
-                  ? 'As senhas não coincidem'
-                  : ''
-              }
-            />
-
-            {error && (
-              <div className="message message-error">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              fullWidth
-              loading={loading}
-              disabled={loading}
-            >
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
-            </Button>
-          </form>
-
-          <div className="login-link">
-            Já tem conta?{' '}
-            <a href={ROUTES.LOGIN}>Faça login</a>
-          </div>
-        </CardBody>
-      </Card>
+        <div className="login-link">
+          Já tem conta?{' '}
+          <a href={ROUTES.LOGIN}>Faça login</a>
+        </div>
+      </div>
     </div>
   );
 }

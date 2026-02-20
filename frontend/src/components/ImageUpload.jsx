@@ -5,7 +5,6 @@ import './ImageUpload.css';
 export const ImageUpload = memo(
   ({ value, onChange, error, label = 'Imagem' }) => {
     const [preview, setPreview] = useState(value || null);
-    const [imageUrl, setImageUrl] = useState('');
 
     const handleFileChange = e => {
       const file = e.target.files[0];
@@ -32,15 +31,8 @@ export const ImageUpload = memo(
       onChange(file);
     };
 
-    const handleUrlSubmit = () => {
-      if (!imageUrl) return;
-      setPreview(imageUrl);
-      onChange(imageUrl);
-    };
-
     const removeImage = () => {
       setPreview(null);
-      setImageUrl('');
       onChange(null);
     };
 
@@ -65,25 +57,6 @@ export const ImageUpload = memo(
                   onChange={handleFileChange}
                   className="file-input"
                 />
-              </div>
-
-              <div className="upload-option">
-                <input
-                  type="url"
-                  placeholder="Ou cole a URL da imagem"
-                  value={imageUrl}
-                  onChange={e =>
-                    setImageUrl(e.target.value)
-                  }
-                  className="input url-input"
-                />
-                <Button
-                  onClick={handleUrlSubmit}
-                  variant="secondary"
-                  disabled={!imageUrl}
-                >
-                  Adicionar URL
-                </Button>
               </div>
             </div>
           </>

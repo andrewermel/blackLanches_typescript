@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '../components/Button';
-import { Card, CardBody } from '../components/Card';
 import { Input } from '../components/Input';
 import { ROUTES } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
@@ -38,70 +37,68 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <Card className="login-card">
-        <CardBody>
-          <h2 className="login-title">Login</h2>
+      <div className="card login-card">
+        <h2 className="login-title">Login</h2>
 
-          {success && (
-            <div className="message message-success">
-              Login realizado com sucesso! Redirecionando...
+        {success && (
+          <div className="message message-success">
+            Login realizado com sucesso! Redirecionando...
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="login-form"
+        >
+          <Input
+            type="email"
+            label="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            error={
+              error && email === ''
+                ? 'Email é obrigatório'
+                : ''
+            }
+            placeholder="seu@email.com"
+          />
+
+          <Input
+            type="password"
+            label="Senha"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            error={
+              error && password === ''
+                ? 'Senha é obrigatória'
+                : ''
+            }
+            placeholder="********"
+          />
+
+          {error && (
+            <div className="message message-error">
+              {error}
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            className="login-form"
+          <Button
+            type="submit"
+            fullWidth
+            loading={loading}
+            disabled={loading}
           >
-            <Input
-              type="email"
-              label="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              error={
-                error && email === ''
-                  ? 'Email é obrigatório'
-                  : ''
-              }
-              placeholder="seu@email.com"
-            />
+            {loading ? 'Entrando...' : 'Entrar'}
+          </Button>
+        </form>
 
-            <Input
-              type="password"
-              label="Senha"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              error={
-                error && password === ''
-                  ? 'Senha é obrigatória'
-                  : ''
-              }
-              placeholder="********"
-            />
-
-            {error && (
-              <div className="message message-error">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              fullWidth
-              loading={loading}
-              disabled={loading}
-            >
-              {loading ? 'Entrando...' : 'Entrar'}
-            </Button>
-          </form>
-
-          <div className="register-link">
-            Não tem conta?{' '}
-            <a href={ROUTES.REGISTER}>Cadastre-se</a>
-          </div>
-        </CardBody>
-      </Card>
+        <div className="register-link">
+          Não tem conta?{' '}
+          <a href={ROUTES.REGISTER}>Cadastre-se</a>
+        </div>
+      </div>
     </div>
   );
 }
